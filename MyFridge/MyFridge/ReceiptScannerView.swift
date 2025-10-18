@@ -34,7 +34,7 @@ struct ReceiptScannerView: View {
                     )
                     .ignoresSafeArea()
                     
-                    // Overlay UI
+                    // Minimal Overlay UI
                     scannerOverlay
                 } else {
                     // Fallback for unsupported devices
@@ -68,7 +68,7 @@ struct ReceiptScannerView: View {
         }
     }
     
-    // MARK: - Scanner Overlay
+    // MARK: - Minimal Scanner Overlay
     
     private var scannerOverlay: some View {
         VStack {
@@ -104,31 +104,9 @@ struct ReceiptScannerView: View {
             
             Spacer()
             
-            // Scanning guide frame
-            RoundedRectangle(cornerRadius: 20)
-                .stroke(style: StrokeStyle(lineWidth: 3, dash: [10, 5]))
-                .foregroundStyle(.white.opacity(0.8))
-                .frame(width: 300, height: 400)
-                .overlay(
-                    VStack(spacing: 12) {
-                        Image(systemName: "doc.text.viewfinder")
-                            .font(.system(size: 48))
-                            .foregroundStyle(.white)
-                            .shadow(color: .black.opacity(0.5), radius: 4)
-                        
-                        Text("Position receipt within frame")
-                            .font(.system(size: 15, weight: .medium))
-                            .foregroundStyle(.white)
-                            .multilineTextAlignment(.center)
-                            .shadow(color: .black.opacity(0.5), radius: 4)
-                    }
-                    .offset(y: -150)
-                )
-            
-            Spacer()
-            
-            // Instructions card
-            VStack(spacing: 12) {
+            // Minimal status indicator at bottom
+            VStack(spacing: 16) {
+                // Status card
                 HStack(spacing: 16) {
                     Image(systemName: isScanning ? "camera.fill" : "camera.slash.fill")
                         .font(.system(size: 24))
@@ -146,62 +124,38 @@ struct ReceiptScannerView: View {
                     
                     Spacer()
                 }
-            }
-            .padding(16)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(.ultraThinMaterial)
-            )
-            .padding(.horizontal)
-            
-            // Bottom action buttons
-            HStack(spacing: 16) {
-                // Toggle scanning button
-                Button(action: {
-                    withAnimation {
-                        isScanning.toggle()
-                    }
-                }) {
-                    HStack(spacing: 8) {
-                        Image(systemName: isScanning ? "pause.circle.fill" : "play.circle.fill")
-                            .font(.system(size: 20))
-                        Text(isScanning ? "Pause" : "Resume")
-                            .font(.system(size: 16, weight: .semibold))
-                    }
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(
-                        Capsule()
-                            .fill(.ultraThinMaterial)
-                    )
-                }
+                .padding(16)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(.ultraThinMaterial)
+                )
+                .padding(.horizontal)
                 
-                // Done scanning button
-                Button(action: processScannedText) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 20))
-                        Text("Done")
-                            .font(.system(size: 16, weight: .semibold))
-                    }
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(
-                        LinearGradient(
-                            colors: [.blue, .blue.opacity(0.8)],
-                            startPoint: .leading,
-                            endPoint: .trailing
+                // Floating Done button (only shows when text detected)
+                if !scannedText.isEmpty {
+                    Button(action: processScannedText) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 20))
+                            Text("Done Scanning")
+                                .font(.system(size: 16, weight: .semibold))
+                        }
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 32)
+                        .padding(.vertical, 14)
+                        .background(
+                            LinearGradient(
+                                colors: [.blue, .blue.opacity(0.8)],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
                         )
-                    )
-                    .clipShape(Capsule())
-                    .shadow(color: .blue.opacity(0.4), radius: 8, y: 4)
+                        .clipShape(Capsule())
+                        .shadow(color: .blue.opacity(0.4), radius: 8, y: 4)
+                    }
+                    .transition(.scale.combined(with: .opacity))
                 }
-                .disabled(scannedText.isEmpty)
-                .opacity(scannedText.isEmpty ? 0.5 : 1)
             }
-            .padding(.horizontal)
             .padding(.bottom, 40)
         }
     }
