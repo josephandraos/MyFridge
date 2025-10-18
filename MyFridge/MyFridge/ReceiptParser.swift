@@ -284,6 +284,8 @@ struct ReceiptParser {
         "vitae farms eggs": ("Eggs", .dairy),
         "omega pro eggs": ("Omega-3 Eggs", .dairy),
         "egglicious eggs": ("Eggs", .dairy),
+        "Oeuf": ("Eggs", .dairy),
+        "Oeufs": ("Eggs", .dairy),
         
         // Store Brands
         "presidents choice eggs": ("Eggs", .dairy),
@@ -348,7 +350,6 @@ struct ReceiptParser {
         "silhouette yogurt": ("Yogurt", .dairy),
         "yoplait yogurt": ("Yogurt", .dairy),
         "yop drinkable yogurt": ("Yogurt Drink", .dairy),
-        "yop yogurt drink": ("Yogurt Drink", .dairy),
         "source yogurt": ("Yogurt", .dairy),
         "tubes yogurt": ("Yogurt", .dairy),
         "natrel yogurt": ("Yogurt", .dairy),
@@ -361,6 +362,7 @@ struct ReceiptParser {
         "great value yogurt": ("Yogurt", .dairy),
         "coop gold yogurt": ("Yogurt", .dairy),
         "kirkland yogurt": ("Yogurt", .dairy),
+        "labneh": ("Yogurt", .dairy),
         
         // Greek Yogurt
         "oikos greek yogurt": ("Greek Yogurt", .dairy),
@@ -423,7 +425,6 @@ struct ReceiptParser {
         "neilson cream": ("Cream", .dairy),
         "sealtest cream": ("Cream", .dairy),
         "dairyland cream": ("Cream", .dairy),
-        "island farms cream": ("Cream", .dairy),
         "agropur cream": ("Cream", .dairy),
         "gay lea cream": ("Cream", .dairy),
         "saputo cream": ("Cream", .dairy),
@@ -494,20 +495,8 @@ struct ReceiptParser {
         // VEGETABLE BRANDS
         // ============================================
 
-        // Frozen Vegetable Brands
-        "arctic gardens vegetables": ("Frozen Vegetables", .vegetables),
-        "green giant vegetables": ("Frozen Vegetables", .vegetables),
-        "le sieur vegetables": ("Frozen Vegetables", .vegetables),
-        "bonduelle vegetables": ("Frozen Vegetables", .vegetables),
-        "birds eye vegetables": ("Frozen Vegetables", .vegetables),
-        "mccain vegetables": ("Frozen Vegetables", .vegetables),
-        "oxford frozen vegetables": ("Frozen Vegetables", .vegetables),
-        "fennec vegetables": ("Frozen Vegetables", .vegetables),
-        "natures touch vegetables": ("Frozen Vegetables", .vegetables),
-        "green giant valley selections": ("Frozen Vegetables", .vegetables),
 
         // Store Brand Vegetables
-        "no name vegetables": ("Frozen Vegetables", .vegetables),
         "presidents choice vegetables": ("Vegetables", .vegetables),
         "pc vegetables": ("Vegetables", .vegetables),
         "compliments vegetables": ("Vegetables", .vegetables),
@@ -709,24 +698,6 @@ struct ReceiptParser {
         "dates": ("Dates", .fruits),
         "persimmons": ("Persimmon", .fruits),
 
-        // Frozen Fruit Brands
-        "arctic gardens fruits": ("Frozen Fruit", .fruits),
-        "natures touch frozen fruit": ("Frozen Fruit", .fruits),
-        "bonduelle fruits": ("Frozen Fruit", .fruits),
-        "dole frozen fruit": ("Frozen Fruit", .fruits),
-        "compliments frozen fruit": ("Frozen Fruit", .fruits),
-        "no name frozen fruit": ("Frozen Fruit", .fruits),
-        "presidents choice frozen fruit": ("Frozen Fruit", .fruits),
-        "pc frozen fruit": ("Frozen Fruit", .fruits),
-        "irresistibles frozen fruit": ("Frozen Fruit", .fruits),
-        "great value frozen fruit": ("Frozen Fruit", .fruits),
-        "kirkland frozen fruit": ("Frozen Fruit", .fruits),
-        "coop gold frozen fruit": ("Frozen Fruit", .fruits),
-        "natural sensations frozen fruit": ("Frozen Fruit", .fruits),
-        "oasis smoothie fruit mix": ("Frozen Fruit Mix", .fruits),
-        "tropical gold frozen fruit": ("Frozen Fruit", .fruits),
-        "cascadian farm frozen fruit": ("Organic Frozen Fruit", .fruits),
-        "earthbound farm frozen fruit": ("Organic Frozen Fruit", .fruits),
 
         // Canned / Jarred / Packaged Fruit
         "dole fruit cups": ("Fruit Cup", .fruits),
@@ -742,14 +713,11 @@ struct ReceiptParser {
         "oasis fruit salad": ("Fruit Salad", .fruits),
         "sunny fruit": ("Dried Fruit", .fruits),
         "prana organic fruit": ("Organic Dried Fruit", .fruits),
-        "sunmaid raisins": ("Raisins", .fruits),
         "ocean spray cranberries": ("Cranberries", .fruits),
 
         // Dried Fruit Brands
-        "sun-maid raisins": ("Raisins", .fruits),
         "sun maid": ("Raisins", .fruits),
         "ocean spray dried cranberries": ("Dried Cranberries", .fruits),
-        "craisins": ("Dried Cranberries", .fruits),
         "made in nature": ("Dried Fruit", .fruits),
         "bare snacks": ("Dried Fruit", .fruits),
         "kirkland dried fruit": ("Dried Fruit", .fruits),
@@ -765,7 +733,6 @@ struct ReceiptParser {
         "coop gold pure organic fruits": ("Organic Fruit", .fruits),
         "farm boy organic fruits": ("Organic Fruit", .fruits),
         "maison riviera organic fruits": ("Organic Fruit", .fruits),
-        "frozenland organic fruits": ("Organic Fruit", .fruits),
 
         // Store Brand Fruits
         "no name fruit": ("Fruit", .fruits),
@@ -784,7 +751,6 @@ struct ReceiptParser {
         // Common Receipt Variants
         "fruit mix": ("Fruit Mix", .fruits),
         "fruit cup": ("Fruit Cup", .fruits),
-        "frozen fruit": ("Frozen Fruit", .fruits),
         "smoothie fruit": ("Smoothie Fruit", .fruits),
         "fresh fruit": ("Fresh Fruit", .fruits),
         "organic fruit": ("Organic Fruit", .fruits),
@@ -809,14 +775,11 @@ struct ReceiptParser {
         "butterball turkey": ("Turkey", .meat),
         "janes chicken": ("Chicken", .meat),
         "oak run farms meat": ("Meat", .meat),
-        "lilydale chicken": ("Chicken", .meat),
         "hormel meat": ("Meat", .meat),
         "maple lodge farms chicken": ("Chicken", .meat),
         "maple lodge": ("Chicken", .meat),
         "blue ribbon beef": ("Beef", .meat),
-        "pintys chicken": ("Chicken", .meat),
         "fletchers meat": ("Meat", .meat),
-        "beretta farms beef": ("Beef", .meat),
         "carvers choice meat": ("Meat", .meat),
         "aliments aston beef": ("Beef", .meat),
         "ferme des volailles chicken": ("Chicken", .meat),
@@ -945,7 +908,6 @@ struct ReceiptParser {
         "nova scotia lobster": ("Lobster", .meat),
         "fisher king fish": ("Fish", .meat),
         "true north seafood": ("Seafood", .meat),
-        "frozenland shrimp": ("Shrimp", .meat),
         "canadian seafood fish": ("Fish", .meat),
         "lobster pound lobster": ("Lobster", .meat),
         "sealord fish": ("Fish", .meat),
@@ -958,18 +920,6 @@ struct ReceiptParser {
         "oceans crab": ("Crab", .meat),
         "ocean's crab": ("Crab", .meat),
 
-        // Frozen Meat & Seafood
-        "janes frozen chicken": ("Frozen Chicken", .meat),
-        "high liner frozen fish": ("Frozen Fish", .meat),
-        "maple leaf frozen meatballs": ("Frozen Meatballs", .meat),
-        "pc frozen chicken": ("Frozen Chicken", .meat),
-        "great value frozen meat": ("Frozen Meat", .meat),
-        "compliments frozen chicken": ("Frozen Chicken", .meat),
-        "irresistibles frozen fish": ("Frozen Fish", .meat),
-        "kirkland frozen salmon": ("Frozen Salmon", .meat),
-        "coop gold frozen fish": ("Frozen Fish", .meat),
-        "no name frozen meat": ("Frozen Meat", .meat),
-        "farm boy frozen chicken": ("Frozen Chicken", .meat),
 
         // Organic / Local / Premium Brands
         "dubreton organic pork": ("Organic Pork", .meat),
@@ -1031,7 +981,6 @@ struct ReceiptParser {
         "haddock": ("Haddock", .meat),
         "halibut": ("Halibut", .meat),
         "tilapia": ("Tilapia", .meat),
-        "frozen fish": ("Frozen Fish", .meat),
         "seafood mix": ("Seafood Mix", .meat),
         "lobster tail": ("Lobster Tail", .meat),
         "scallops": ("Scallops", .meat),
@@ -1140,8 +1089,6 @@ struct ReceiptParser {
         "entenmanns pastries": ("Pastries", .bakery),
         "entenmann's pastries": ("Pastries", .bakery),
         "little debbie cakes": ("Cakes", .bakery),
-        "hostess cupcakes": ("Cupcakes", .bakery),
-        "vachon pastries": ("Pastries", .bakery),
         "jos louis": ("Pastries", .bakery),
         "ah caramel": ("Pastries", .bakery),
         "drakes pastries": ("Pastries", .bakery),
@@ -1150,20 +1097,6 @@ struct ReceiptParser {
         "bens bakery pastries": ("Pastries", .bakery),
         "st pierre brioche": ("Brioche", .bakery),
 
-        // Frozen Bread & Bakery
-        "pc frozen croissants": ("Frozen Croissants", .bakery),
-        "irresistibles frozen dough": ("Frozen Dough", .bakery),
-        "compliments frozen bread": ("Frozen Bread", .bakery),
-        "great value frozen buns": ("Frozen Buns", .bakery),
-        "no name frozen dough": ("Frozen Dough", .bakery),
-        "coop gold frozen bread": ("Frozen Bread", .bakery),
-        "mccain frozen cake": ("Frozen Cake", .bakery),
-        "pepperidge farm frozen pastry": ("Frozen Pastry", .bakery),
-        "tenderflake pie shells": ("Pie Shells", .bakery),
-        "kirkland frozen pastry": ("Frozen Pastry", .bakery),
-        "lafayette mini croissants": ("Mini Croissants", .bakery),
-        "rhodes frozen rolls": ("Frozen Rolls", .bakery),
-        "pillsbury dough": ("Frozen Dough", .bakery),
 
         // Store / Private Label Bread
         "presidents choice bread": ("Bread", .bakery),
@@ -1203,7 +1136,6 @@ struct ReceiptParser {
         // Sweet Bakery / Desserts
         "vachon pastries": ("Pastries", .bakery),
         "hostess twinkies": ("Twinkies", .bakery),
-        "little debbie snacks": ("Snacks", .bakery),
         "drakes cakes": ("Cakes", .bakery),
         "drake's cakes": ("Cakes", .bakery),
         "entenmanns donuts": ("Donuts", .bakery),
@@ -1212,15 +1144,9 @@ struct ReceiptParser {
         "pc bakery muffins": ("Muffins", .bakery),
         "great value muffins": ("Muffins", .bakery),
         "irresistibles pastries": ("Pastries", .bakery),
-        "no name cookies": ("Cookies", .bakery),
         "compliments donuts": ("Donuts", .bakery),
-        "coop gold cookies": ("Cookies", .bakery),
-        "kirkland cookies": ("Cookies", .bakery),
         "presidents choice cookies": ("Cookies", .bakery),
-        "pc cookies": ("Cookies", .bakery),
-        "oreo cookies": ("Cookies", .bakery),
-        "chips ahoy cookies": ("Cookies", .bakery),
-        "dad's cookies": ("Cookies", .bakery),
+
 
         // Common Bread Types (as they appear on receipts)
         "white bread": ("White Bread", .bakery),
@@ -1240,7 +1166,6 @@ struct ReceiptParser {
         "croissants": ("Croissants", .bakery),
         "pastries": ("Pastries", .bakery),
         "muffins": ("Muffins", .bakery),
-        "cookies": ("Cookies", .bakery),
         "cakes": ("Cakes", .bakery),
         "pies": ("Pies", .bakery),
         "donuts": ("Donuts", .bakery),
@@ -1321,7 +1246,6 @@ struct ReceiptParser {
         "beatrice juice": ("Beatrice Juice", .beverages),
         "natrel juice": ("Natrel Juice", .beverages),
         "pc juice": ("PC Juice", .beverages),
-        "pc organics juice": ("PC Organics Juice", .beverages),
         "no name juice": ("No Name Juice", .beverages),
         "compliments juice": ("Compliments Juice", .beverages),
         "irresistibles juice": ("Irresistibles Juice", .beverages),
@@ -1926,268 +1850,6 @@ struct ReceiptParser {
         "mints": ("Mints", .snacks),
         "pretzels": ("Pretzels", .snacks),
         
-        // ============================================
-        // FROZEN FOODS
-        // ============================================
-
-        // Frozen Pizza
-        "delissio pizza": ("Delissio Pizza", .frozen),
-        "delissio": ("Delissio Pizza", .frozen),
-        "delissio frozen pizza": ("Delissio Pizza", .frozen),
-        "dr oetker pizza": ("Dr. Oetker Pizza", .frozen),
-        "dr oetker ristorante": ("Dr. Oetker Pizza", .frozen),
-        "dr oetker": ("Dr. Oetker Pizza", .frozen),
-        "mccain pizza": ("McCain Pizza", .frozen),
-        "pizza pockets": ("Pizza Pockets", .frozen),
-        "pizza pops": ("Pizza Pops", .frozen),
-        "mama mia pizza": ("Mama Mia Pizza", .frozen),
-        "pc frozen pizza": ("PC Frozen Pizza", .frozen),
-        "pc pizza": ("PC Pizza", .frozen),
-        "no name pizza": ("No Name Pizza", .frozen),
-        "compliments pizza": ("Compliments Pizza", .frozen),
-        "irresistibles pizza": ("Irresistibles Pizza", .frozen),
-        "great value pizza": ("Great Value Pizza", .frozen),
-        "coop gold pizza": ("Co-op Gold Pizza", .frozen),
-        "kirkland pizza": ("Kirkland Pizza", .frozen),
-        "mott's pizza": ("Mott's Pizza", .frozen),
-        "farm boy pizza": ("Farm Boy Pizza", .frozen),
-        "amy's organic pizza": ("Amy's Organic Pizza", .frozen),
-        "amys organic pizza": ("Amy's Organic Pizza", .frozen),
-        "caulipower pizza": ("Caulipower Pizza", .frozen),
-        "di giorno pizza": ("DiGiorno Pizza", .frozen),
-        "digiorno pizza": ("DiGiorno Pizza", .frozen),
-        "mike's frozen pizza": ("Mike's Frozen Pizza", .frozen),
-        "mikes frozen pizza": ("Mike's Frozen Pizza", .frozen),
-
-        // Frozen Vegetables & Fruit
-        "arctic gardens vegetables": ("Arctic Gardens Vegetables", .frozen),
-        "arctic gardens": ("Arctic Gardens Vegetables", .frozen),
-        "green giant vegetables": ("Green Giant Vegetables", .frozen),
-        "green giant frozen": ("Green Giant Vegetables", .frozen),
-        "bonduelle vegetables": ("Bonduelle Vegetables", .frozen),
-        "bonduelle frozen": ("Bonduelle Vegetables", .frozen),
-        "nature's touch fruit": ("Nature's Touch Fruit", .frozen),
-        "natures touch fruit": ("Nature's Touch Fruit", .frozen),
-        "natures touch": ("Nature's Touch Fruit", .frozen),
-        "dole frozen fruit": ("Dole Frozen Fruit", .frozen),
-        "sunrype frozen fruit": ("SunRype Frozen Fruit", .frozen),
-        "sunrype frozen": ("SunRype Frozen Fruit", .frozen),
-        "pc frozen vegetables": ("PC Frozen Vegetables", .frozen),
-        "no name frozen vegetables": ("No Name Frozen Vegetables", .frozen),
-        "compliments frozen vegetables": ("Compliments Frozen Vegetables", .frozen),
-        "irresistibles frozen vegetables": ("Irresistibles Frozen Vegetables", .frozen),
-        "great value frozen vegetables": ("Great Value Frozen Vegetables", .frozen),
-        "coop gold frozen vegetables": ("Co-op Gold Frozen Vegetables", .frozen),
-        "kirkland frozen vegetables": ("Kirkland Frozen Vegetables", .frozen),
-        "farm boy frozen vegetables": ("Farm Boy Frozen Vegetables", .frozen),
-        "cascadian farm organic": ("Cascadian Farm Organic Vegetables", .frozen),
-        "cascadian farm": ("Cascadian Farm Organic Vegetables", .frozen),
-        "earthbound farm veggies": ("Earthbound Farm Vegetables", .frozen),
-        "mccain veggies": ("McCain Vegetables", .frozen),
-        "mccain frozen vegetables": ("McCain Vegetables", .frozen),
-
-        // Frozen Meat & Poultry
-        "janes chicken strips": ("Janes Chicken Strips", .frozen),
-        "janes strips": ("Janes Chicken Strips", .frozen),
-        "janes chicken burgers": ("Janes Chicken Burgers", .frozen),
-        "janes burgers": ("Janes Chicken Burgers", .frozen),
-        "janes frozen chicken": ("Janes Frozen Chicken", .frozen),
-        "maple leaf meatballs": ("Maple Leaf Meatballs", .frozen),
-        "schneiders sausages": ("Schneiders Sausages", .frozen),
-        "schneiders frozen": ("Schneiders Frozen Sausages", .frozen),
-        "lilydale chicken strips": ("Lilydale Chicken Strips", .frozen),
-        "lilydale frozen": ("Lilydale Frozen Chicken", .frozen),
-        "butterball turkey burgers": ("Butterball Turkey Burgers", .frozen),
-        "butterball frozen": ("Butterball Frozen Turkey", .frozen),
-        "pinty's wings": ("Pinty's Wings", .frozen),
-        "pintys wings": ("Pinty's Wings", .frozen),
-        "pintys frozen": ("Pinty's Frozen Chicken", .frozen),
-        "pc chicken burgers": ("PC Chicken Burgers", .frozen),
-        "no name chicken": ("No Name Frozen Chicken", .frozen),
-        "no name frozen chicken": ("No Name Frozen Chicken", .frozen),
-        "compliments chicken": ("Compliments Frozen Chicken", .frozen),
-        "compliments frozen chicken": ("Compliments Frozen Chicken", .frozen),
-        "irresistibles chicken": ("Irresistibles Frozen Chicken", .frozen),
-        "irresistibles frozen chicken": ("Irresistibles Frozen Chicken", .frozen),
-        "great value chicken": ("Great Value Frozen Chicken", .frozen),
-        "great value frozen chicken": ("Great Value Frozen Chicken", .frozen),
-        "coop gold chicken": ("Co-op Gold Frozen Chicken", .frozen),
-        "coop gold frozen chicken": ("Co-op Gold Frozen Chicken", .frozen),
-        "kirkland chicken": ("Kirkland Frozen Chicken", .frozen),
-        "kirkland frozen chicken": ("Kirkland Frozen Chicken", .frozen),
-        "beyond meat burgers": ("Beyond Meat Burgers", .frozen),
-        "impossible burgers": ("Impossible Burgers", .frozen),
-        "sol cuisine burgers": ("Sol Cuisine Burgers", .frozen),
-        "gusta vegan sausage": ("Gusta Vegan Sausage", .frozen),
-        "high liner fish": ("High Liner Fish", .frozen),
-        "high liner frozen fish": ("High Liner Fish", .frozen),
-        "high liner cod": ("High Liner Cod", .frozen),
-        "blue water fish": ("Blue Water Fish", .frozen),
-        "ocean's shrimp": ("Ocean's Shrimp", .frozen),
-        "oceans shrimp": ("Ocean's Shrimp", .frozen),
-        "pc salmon": ("PC Frozen Salmon", .frozen),
-        "pc frozen salmon": ("PC Frozen Salmon", .frozen),
-        "no name fish": ("No Name Frozen Fish", .frozen),
-        "no name frozen fish": ("No Name Frozen Fish", .frozen),
-
-        // Frozen Breakfast / Waffles / Pancakes
-        "eggo waffles": ("Eggo Waffles", .frozen),
-        "eggo": ("Eggo Waffles", .frozen),
-        "pc waffles": ("PC Waffles", .frozen),
-        "no name waffles": ("No Name Waffles", .frozen),
-        "compliments waffles": ("Compliments Waffles", .frozen),
-        "irresistibles waffles": ("Irresistibles Waffles", .frozen),
-        "great value waffles": ("Great Value Waffles", .frozen),
-        "coop gold waffles": ("Co-op Gold Waffles", .frozen),
-        "kirkland waffles": ("Kirkland Waffles", .frozen),
-        "aunt jemima pancakes": ("Aunt Jemima Pancakes", .frozen),
-        "pearl milling": ("Pearl Milling Pancakes", .frozen),
-        "pc pancakes": ("PC Pancakes", .frozen),
-        "mccain breakfast potatoes": ("McCain Breakfast Potatoes", .frozen),
-        "mccain hashbrowns": ("McCain Hashbrowns", .frozen),
-        "hashbrowns": ("Hashbrowns", .frozen),
-        "no name tater tots": ("No Name Tater Tots", .frozen),
-        "tater tots": ("Tater Tots", .frozen),
-        "great value hashbrowns": ("Great Value Hashbrowns", .frozen),
-        "morningstar breakfast patties": ("MorningStar Breakfast Patties", .frozen),
-        "morningstar": ("MorningStar Breakfast Patties", .frozen),
-        "jimmy dean breakfast sandwich": ("Jimmy Dean Breakfast Sandwich", .frozen),
-        "jimmy dean": ("Jimmy Dean Breakfast Sandwich", .frozen),
-        "pc breakfast sandwich": ("PC Breakfast Sandwich", .frozen),
-
-        // Frozen Ready Meals / Entrees
-        "lean cuisine": ("Lean Cuisine", .frozen),
-        "stouffer's": ("Stouffer's", .frozen),
-        "stouffers": ("Stouffer's", .frozen),
-        "michelina's": ("Michelina's", .frozen),
-        "michelinas": ("Michelina's", .frozen),
-        "smart ones": ("Smart Ones", .frozen),
-        "pc blue menu meals": ("PC Blue Menu Meals", .frozen),
-        "pc blue menu": ("PC Blue Menu", .frozen),
-        "no name meals": ("No Name Frozen Meals", .frozen),
-        "no name frozen meals": ("No Name Frozen Meals", .frozen),
-        "compliments meals": ("Compliments Frozen Meals", .frozen),
-        "compliments frozen meals": ("Compliments Frozen Meals", .frozen),
-        "irresistibles meals": ("Irresistibles Frozen Meals", .frozen),
-        "irresistibles frozen meals": ("Irresistibles Frozen Meals", .frozen),
-        "great value meals": ("Great Value Frozen Meals", .frozen),
-        "great value frozen meals": ("Great Value Frozen Meals", .frozen),
-        "coop gold meals": ("Co-op Gold Frozen Meals", .frozen),
-        "coop gold frozen meals": ("Co-op Gold Frozen Meals", .frozen),
-        "kirkland lasagna": ("Kirkland Lasagna", .frozen),
-        "pc lasagna": ("PC Lasagna", .frozen),
-        "mccain dinners": ("McCain Dinners", .frozen),
-        "hungry-man": ("Hungry-Man", .frozen),
-        "hungry man": ("Hungry-Man", .frozen),
-        "birds eye meals": ("Birds Eye Meals", .frozen),
-        "amy's organic meals": ("Amy's Organic Meals", .frozen),
-        "amys organic meals": ("Amy's Organic Meals", .frozen),
-        "evol meals": ("Evol Meals", .frozen),
-        "caulipower bowls": ("Caulipower Bowls", .frozen),
-        "lucerne meals": ("Lucerne Meals", .frozen),
-        "southwest kitchen": ("Southwest Kitchen", .frozen),
-        "farm boy lasagna": ("Farm Boy Lasagna", .frozen),
-
-        // Frozen Potatoes & Appetizers
-        "mccain fries": ("McCain Fries", .frozen),
-        "mccain superfries": ("McCain Superfries", .frozen),
-        "mccain tater tots": ("McCain Tater Tots", .frozen),
-        "mccain smile fries": ("McCain Smile Fries", .frozen),
-        "mccain appetizers": ("McCain Appetizers", .frozen),
-        "alexia fries": ("Alexia Fries", .frozen),
-        "pc frozen fries": ("PC Frozen Fries", .frozen),
-        "pc fries": ("PC Fries", .frozen),
-        "no name fries": ("No Name Fries", .frozen),
-        "compliments fries": ("Compliments Fries", .frozen),
-        "irresistibles fries": ("Irresistibles Fries", .frozen),
-        "great value fries": ("Great Value Fries", .frozen),
-        "coop gold fries": ("Co-op Gold Fries", .frozen),
-        "kirkland fries": ("Kirkland Fries", .frozen),
-        "tgi fridays appetizers": ("TGI Fridays Appetizers", .frozen),
-        "tgi fridays": ("TGI Fridays Appetizers", .frozen),
-        "chef boss appetizers": ("Chef Boss Appetizers", .frozen),
-        "pinty's appetizers": ("Pinty's Appetizers", .frozen),
-        "pintys appetizers": ("Pinty's Appetizers", .frozen),
-        "janes fingers": ("Janes Fingers", .frozen),
-        "farm boy appetizers": ("Farm Boy Appetizers", .frozen),
-
-        // Frozen Desserts & Sweets (Ice Cream already covered in Dairy, but frozen cakes/pies here)
-        "mccain deep n delicious": ("McCain Deep N Delicious Cake", .frozen),
-        "deep n delicious": ("McCain Deep N Delicious Cake", .frozen),
-        "pc cake": ("PC Frozen Cake", .frozen),
-        "pc frozen cake": ("PC Frozen Cake", .frozen),
-        "no name cake": ("No Name Frozen Cake", .frozen),
-        "compliments pie": ("Compliments Frozen Pie", .frozen),
-        "compliments frozen pie": ("Compliments Frozen Pie", .frozen),
-        "irresistibles cake": ("Irresistibles Frozen Cake", .frozen),
-        "great value pie": ("Great Value Frozen Pie", .frozen),
-        "tenderflake pie": ("Tenderflake Pie", .frozen),
-        "vachon pastry": ("Vachon Frozen Pastry", .frozen),
-        "hostess frozen treats": ("Hostess Frozen Treats", .frozen),
-
-        // Frozen Pasta, Sides & Ethnic
-        "olivieri pasta": ("Olivieri Pasta", .frozen),
-        "olivieri": ("Olivieri Pasta", .frozen),
-        "catelli lasagna": ("Catelli Lasagna", .frozen),
-        "catelli frozen": ("Catelli Frozen Pasta", .frozen),
-        "pc ravioli": ("PC Ravioli", .frozen),
-        "no name lasagna": ("No Name Lasagna", .frozen),
-        "compliments pasta": ("Compliments Frozen Pasta", .frozen),
-        "compliments frozen pasta": ("Compliments Frozen Pasta", .frozen),
-        "irresistibles pasta": ("Irresistibles Frozen Pasta", .frozen),
-        "great value pasta": ("Great Value Frozen Pasta", .frozen),
-        "great value frozen pasta": ("Great Value Frozen Pasta", .frozen),
-        "coop gold pasta": ("Co-op Gold Frozen Pasta", .frozen),
-        "kirkland pasta": ("Kirkland Frozen Pasta", .frozen),
-        "chef boyardee frozen": ("Chef Boyardee Frozen", .frozen),
-        "pc chinese dinner": ("PC Chinese Dinner", .frozen),
-        "compliments indian meal": ("Compliments Indian Meal", .frozen),
-        "no name fried rice": ("No Name Fried Rice", .frozen),
-        "tandoori kitchen": ("Tandoori Kitchen", .frozen),
-        "asian inspirations": ("Asian Inspirations", .frozen),
-        "biryani kitchen": ("Biryani Kitchen", .frozen),
-        "sushi frozen": ("Frozen Sushi", .frozen),
-        "frozen sushi": ("Frozen Sushi", .frozen),
-        "pc dumplings": ("PC Dumplings", .frozen),
-        "summ! dumplings": ("Summ! Dumplings", .frozen),
-        "siwin foods dumplings": ("Siwin Foods Dumplings", .frozen),
-        "siwin dumplings": ("Siwin Foods Dumplings", .frozen),
-
-        // Store / Private Label Frozen Lines
-        "pc frozen food": ("PC Frozen Food", .frozen),
-        "no name frozen food": ("No Name Frozen Food", .frozen),
-        "compliments frozen food": ("Compliments Frozen Food", .frozen),
-        "irresistibles frozen food": ("Irresistibles Frozen Food", .frozen),
-        "great value frozen food": ("Great Value Frozen Food", .frozen),
-        "coop gold frozen food": ("Co-op Gold Frozen Food", .frozen),
-        "kirkland frozen food": ("Kirkland Frozen Food", .frozen),
-        "farm boy frozen food": ("Farm Boy Frozen Food", .frozen),
-        "longos frozen food": ("Longos Frozen Food", .frozen),
-        "metro frozen food": ("Metro Frozen Food", .frozen),
-        "freshco frozen food": ("FreshCo Frozen Food", .frozen),
-        "safeway frozen food": ("Safeway Frozen Food", .frozen),
-        "sobeys frozen food": ("Sobeys Frozen Food", .frozen),
-
-        // Common Receipt Variants
-        "frozen pizza": ("Frozen Pizza", .frozen),
-        "frozen meal": ("Frozen Meal", .frozen),
-        "frozen dinner": ("Frozen Dinner", .frozen),
-        "frozen fries": ("Frozen Fries", .frozen),
-        "frozen vegetables": ("Frozen Vegetables", .frozen),
-        "frozen fruit": ("Frozen Fruit", .frozen),
-        "frozen chicken": ("Frozen Chicken", .frozen),
-        "frozen burgers": ("Frozen Burgers", .frozen),
-        "frozen wings": ("Frozen Wings", .frozen),
-        "frozen fish": ("Frozen Fish", .frozen),
-        "frozen shrimp": ("Frozen Shrimp", .frozen),
-        "frozen lasagna": ("Frozen Lasagna", .frozen),
-        "frozen dessert": ("Frozen Dessert", .frozen),
-        "frozen waffles": ("Frozen Waffles", .frozen),
-        "frozen breakfast": ("Frozen Breakfast", .frozen),
-        "frozen pie": ("Frozen Pie", .frozen),
-        "frozen pastry": ("Frozen Pastry", .frozen),
-        "frozen bread": ("Frozen Bread", .frozen),
-        "frozen appetizers": ("Frozen Appetizers", .frozen),
     ]
     
     // MARK: - Whitelist of Recognized Food Items (Fallback)
@@ -2460,27 +2122,50 @@ struct ReceiptParser {
     }
     
     private static func extractQuantity(from text: String) -> Int {
-        // Look for patterns like "2x", "x2", "qty 2", "2 ea"
+        // CRITICAL: For Costco/similar receipts, SKIP the item ID at the start
+        // Format: [ITEM_ID] [DESCRIPTION] [PRICE]
+        
+        let trimmed = text.trimmingCharacters(in: .whitespaces)
+        
+        // Skip leading item IDs (5-7 digits followed by space)
+        // This prevents treating "30669 BANANES" as quantity=30669
+        var workingText = trimmed
+        if let regex = try? NSRegularExpression(pattern: #"^\d{4,7}\s+"#),
+           let match = regex.firstMatch(in: trimmed, range: NSRange(trimmed.startIndex..., in: trimmed)),
+           let range = Range(match.range, in: trimmed) {
+            workingText = String(trimmed[range.upperBound...])
+        }
+        
+        // NOW look for quantity patterns in the DESCRIPTION part only
         let patterns = [
-            #"^(\d+)\s*x"#,         // "2x Item"
-            #"x\s*(\d+)"#,          // "x2 Item"
-            #"qty\s*:?\s*(\d+)"#,   // "qty: 2" or "qty 2"
-            #"(\d+)\s*ea"#,         // "2 ea"
-            #"^(\d+)\s+[a-zA-Z]"#   // "2 Apples"
+            #"(\d+\.?\d*)\s*(DZ|DOZ|DOZEN)"#,  // "2.5 DZ" (dozen)
+            #"(\d+\.?\d*)\s*L\b"#,              // "4.3L" (liters)
+            #"(\d+\.?\d*)\s*KG"#,               // "2.5KG" (kilograms)
+            #"(\d+\.?\d*)\s*LB"#,               // "3.2LB" (pounds)
+            #"\bQTY\s*:?\s*(\d+)"#,             // "QTY: 2" or "QTY 2"
+            #"\b(\d+)\s*X\b"#,                  // "2 X" or "2X"
+            #"\bX\s*(\d+)\b"#,                  // "X 2"
+            #"\b(\d+)\s*EA\b"#,                 // "2 EA"
         ]
         
         for pattern in patterns {
             if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive),
-               let match = regex.firstMatch(in: text, range: NSRange(text.startIndex..., in: text)),
-               let range = Range(match.range(at: 1), in: text),
-               let quantity = Int(text[range]) {
-                return quantity
+               let match = regex.firstMatch(in: workingText, range: NSRange(workingText.startIndex..., in: workingText)),
+               let range = Range(match.range(at: 1), in: workingText) {
+                
+                // Extract the numeric value
+                let quantityStr = String(workingText[range])
+                
+                // Handle decimal quantities (e.g., "2.5" for 2.5 dozen)
+                if let quantityDouble = Double(quantityStr) {
+                    // For fractional quantities like "2.5 DZ", round up
+                    return Int(ceil(quantityDouble))
+                }
             }
         }
         
-        return 1 // Default quantity
+        return 1 // Default: if no quantity found in description, assume 1
     }
-    
     private static func mergeDuplicates(_ items: [ParsedItem]) -> [ParsedItem] {
         var merged: [String: ParsedItem] = [:]
         
