@@ -2,385 +2,256 @@
 //  MyFridgeApp.swift
 //  MyFridge
 //
-//  Created by Joe Andraos on 2025-10-03.
+//  Fixed to show ContentView with fridge icon after login
 //
 
 import SwiftUI
 import SwiftData
-import UserNotifications
 
 @main
 struct MyFridgeApp: App {
-    // MARK: - SwiftData Model Container
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(
-            schema: schema,
-            isStoredInMemoryOnly: false
-        )
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
-    
-    // MARK: - Notification Manager
+    // MARK: - State Objects
+    @StateObject private var authManager = AuthenticationManager()
+    @StateObject private var subscriptionManager = SubscriptionManager()
     @StateObject private var notificationManager = NotificationManager.shared
     
-    // MARK: - App Delegate
-    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    
-    // MARK: - Scene Phase
-    @Environment(\.scenePhase) private var scenePhase
-
-    // MARK: - App Initialization
-    init() {
-        // Setup notification categories with actions
-        NotificationManager.shared.setupNotificationCategories()
-        
-        // Configure app appearance
-        configureAppearance()
-    }
-
-    // MARK: - Scene Definition
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environmentObject(notificationManager)
-                .onAppear {
-                    performMaintenanceTasks()
-                }
-        }
-        .modelContainer(sharedModelContainer)
-        .onChange(of: scenePhase) { oldPhase, newPhase in
-            handleScenePhaseChange(from: oldPhase, to: newPhase)
-        }
-    }
-    
-    // MARK: - Appearance Configuration
-    
-    private func configureAppearance() {
-        // Customize navigation bar appearance if needed
-        let appearance = UINavigationBarAppearance()
-        appearance.configureWithDefaultBackground()
-        UINavigationBar.appearance().standardAppearance = appearance
-        UINavigationBar.appearance().scrollEdgeAppearance = appearance
-    }
-    
-    // MARK: - Scene Phase Handling
-    
-    private func handleScenePhaseChange(from oldPhase: ScenePhase, to newPhase: ScenePhase) {
-        switch newPhase {
-        case .active:
-            // App became active
-            print("📱 App became active")
-            // Refresh notification permission status
-            Task {
-                await notificationManager.checkAuthorizationStatus()
+            // Show login screen if not authenticated, otherwise show main app
+            if authManager.isAuthenticated {
+                ContentView()
+                    .environmentObject(authManager)
+                    .environmentObject(subscriptionManager)
+                    .environmentObject(notificationManager)
+                    .modelContainer(for: Item.self)
+            } else {
+                LoginView()
+                    .environmentObject(authManager)
             }
-            
-        case .inactive:
-            // App became inactive
-            print("📱 App became inactive")
-            
-        case .background:
-            // App moved to background
-            print("📱 App moved to background")
-            // Update app badge count
-            updateBadgeCount()
-            
-        @unknown default:
-            break
         }
     }
+}
+// MARK: - Main App View (Authenticated Users)
+struct MainAppView: View {
+    @EnvironmentObject var authManager: AuthenticationManager
+    @EnvironmentObject var subscriptionManager: SubscriptionManager
+    @Environment(\.modelContext) private var modelContext
+    @Query private var items: [Item]
     
-    // MARK: - Maintenance Tasks
+    @State private var showingPaywall = false
+    @State private var showingSettings = false
     
-    /// Perform cleanup and rescheduling on app launch
-    private func performMaintenanceTasks() {
-        Task { @MainActor in
-            print("🔧 Starting maintenance tasks...")
-            
-            // Check notification permission status
-            await notificationManager.checkAuthorizationStatus()
-            
-            // Clean up expired items and reschedule notifications
-            let context = sharedModelContainer.mainContext
-            let descriptor = FetchDescriptor<Item>()
-            
-            do {
-                let items = try context.fetch(descriptor)
-                print("📊 Found \(items.count) items in database")
-                
-                // Find expired items to clean up notifications
-                let expiredItems = items.filter { $0.isExpired }
-                if !expiredItems.isEmpty {
-                    print("🗑️ Cleaning up \(expiredItems.count) expired items")
-                    let expiredItemIds = expiredItems.map { $0.id }
-                    notificationManager.cleanupNotifications(itemIds: expiredItemIds)
+    var body: some View {
+        NavigationView {
+            VStack {
+                // Premium banner if not subscribed
+                if !subscriptionManager.isPremium {
+                    PremiumBanner {
+                        showingPaywall = true
+                    }
                 }
                 
-                // Reschedule notifications for active items if permission is granted
-                if notificationManager.notificationPermissionGranted {
-                    let activeItems = items.filter { !$0.isExpired && $0.notificationScheduled }
-                    print("🔔 Rescheduling notifications for \(activeItems.count) active items")
-                    
-                    for item in activeItems {
-                        await notificationManager.scheduleNotification(
-                            for: item,
-                            leadTimeDays: item.customLeadTimeDays
+                // Your existing MyFridge content here
+                // (Your item list, add button, scanner, etc.)
+                ItemListView(items: items)
+                
+                Spacer()
+            }
+            .navigationTitle("MyFridge")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    // Premium badge
+                    if subscriptionManager.isPremium {
+                        HStack(spacing: 4) {
+                            Image(systemName: "crown.fill")
+                                .font(.caption)
+                            Text("Premium")
+                                .font(.caption.bold())
+                        }
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [.yellow, .orange],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
                         )
                     }
                 }
                 
-                // Log pending notification count
-                let pendingCount = await notificationManager.getPendingNotificationCount()
-                print("📊 Active notifications: \(pendingCount)")
-                
-                // Update badge count
-                updateBadgeCount()
-                
-                print("✅ Maintenance tasks completed")
-            } catch {
-                print("❌ Error during maintenance: \(error.localizedDescription)")
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        showingSettings = true
+                    } label: {
+                        Image(systemName: "gearshape.fill")
+                    }
+                }
             }
-        }
-    }
-    
-    /// Updates the app badge count based on expiring items
-    private func updateBadgeCount() {
-        Task { @MainActor in
-            let context = sharedModelContainer.mainContext
-            let descriptor = FetchDescriptor<Item>()
-            
-            do {
-                let items = try context.fetch(descriptor)
-                let expiringOrExpiredCount = items.filter { item in
-                    item.isExpired || item.isExpiringSoon
-                }.count
-                
-                // Update badge
-                UNUserNotificationCenter.current().setBadgeCount(expiringOrExpiredCount)
-                print("🔢 Updated badge count to: \(expiringOrExpiredCount)")
-            } catch {
-                print("❌ Error updating badge: \(error.localizedDescription)")
+            .sheet(isPresented: $showingPaywall) {
+                PaywallView()
+            }
+            .sheet(isPresented: $showingSettings) {
+                CombinedSettingsView()
             }
         }
     }
 }
 
-// MARK: - App Delegate for Notification Handling
-class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+// MARK: - Premium Banner
+struct PremiumBanner: View {
+    let onTap: () -> Void
     
-    // MARK: - App Launch
-    func application(
-        _ application: UIApplication,
-        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil
-    ) -> Bool {
-        // Set the notification delegate
-        UNUserNotificationCenter.current().delegate = self
-        
-        print("🚀 MyFridge app launched")
-        return true
-    }
-    
-    // MARK: - Notification Presentation (Foreground)
-    
-    /// Handle notification when app is in foreground
-    func userNotificationCenter(
-        _ center: UNUserNotificationCenter,
-        willPresent notification: UNNotification,
-        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
-    ) {
-        print("🔔 Received notification while app is in foreground")
-        
-        // Show notification even when app is open
-        if #available(iOS 14.0, *) {
-            completionHandler([.banner, .sound, .badge, .list])
-        } else {
-            completionHandler([.alert, .sound, .badge])
-        }
-    }
-    
-    // MARK: - Notification Response Handling
-    
-    /// Handle notification tap and actions
-    func userNotificationCenter(
-        _ center: UNUserNotificationCenter,
-        didReceive response: UNNotificationResponse,
-        withCompletionHandler completionHandler: @escaping () -> Void
-    ) {
-        let userInfo = response.notification.request.content.userInfo
-        
-        print("📱 User interacted with notification - Action: \(response.actionIdentifier)")
-        
-        switch response.actionIdentifier {
-        case "SNOOZE_ACTION":
-            handleSnoozeAction(userInfo: userInfo)
-            
-        case "MARK_USED_ACTION":
-            handleMarkUsedAction(userInfo: userInfo)
-            
-        case UNNotificationDefaultActionIdentifier:
-            // User tapped the notification body
-            handleNotificationTap(userInfo: userInfo)
-            
-        case UNNotificationDismissActionIdentifier:
-            // User dismissed the notification
-            print("🚫 Notification dismissed")
-            
-        default:
-            print("⚠️ Unknown action identifier: \(response.actionIdentifier)")
-        }
-        
-        completionHandler()
-    }
-    
-    // MARK: - Action Handlers
-    
-    /// Handle tapping the notification
-    private func handleNotificationTap(userInfo: [AnyHashable: Any]) {
-        guard let itemIdString = userInfo["itemId"] as? String,
-              let itemId = UUID(uuidString: itemIdString) else {
-            print("⚠️ Invalid item ID in notification")
-            return
-        }
-        
-        print("📱 User tapped notification for item: \(itemId)")
-        
-        // Post notification to open items list
-        NotificationCenter.default.post(
-            name: NSNotification.Name("OpenItemsList"),
-            object: nil,
-            userInfo: ["itemId": itemId]
-        )
-    }
-    
-    /// Handle snooze action - reschedule for 1 day later
-    private func handleSnoozeAction(userInfo: [AnyHashable: Any]) {
-        guard let itemIdString = userInfo["itemId"] as? String,
-              let itemId = UUID(uuidString: itemIdString) else {
-            print("⚠️ Invalid item ID in snooze action")
-            return
-        }
-        
-        print("⏰ Snoozing notification for item: \(itemId)")
-        
-        Task { @MainActor in
-            // Get model context
-            guard let container = try? ModelContainer(
-                for: Item.self,
-                configurations: ModelConfiguration(isStoredInMemoryOnly: false)
-            ) else {
-                print("❌ Could not access model container")
-                return
-            }
-            
-            let context = container.mainContext
-            let descriptor = FetchDescriptor<Item>(
-                predicate: #Predicate { $0.id == itemId }
-            )
-            
-            do {
-                if let item = try context.fetch(descriptor).first {
-                    // Reschedule notification for 1 day later
-                    let calendar = Calendar.current
-                    if let newNotificationDate = calendar.date(byAdding: .day, value: 1, to: Date()) {
-                        await NotificationManager.shared.scheduleNotification(
-                            for: item,
-                            customDate: newNotificationDate
+    var body: some View {
+        Button(action: onTap) {
+            HStack {
+                Image(systemName: "crown.fill")
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [.yellow, .orange],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
                         )
-                        print("✅ Notification snoozed for 1 day")
+                    )
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Try Premium Free")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    Text("Unlimited scans & exclusive features")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer()
+                
+                Image(systemName: "chevron.right")
+                    .foregroundColor(.secondary)
+            }
+            .padding()
+            .background(Color.blue.opacity(0.1))
+            .cornerRadius(12)
+            .padding(.horizontal)
+        }
+    }
+}
+
+// MARK: - Item List View (Placeholder - use your existing design)
+struct ItemListView: View {
+    let items: [Item]
+    
+    var body: some View {
+        List(items) { item in
+            VStack(alignment: .leading) {
+                Text(item.name)
+                    .font(.headline)
+                Text("Expires: \(item.expirationDate, style: .date)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+}
+
+// MARK: - Combined Settings View (Account + Notifications)
+struct CombinedSettingsView: View {
+    @EnvironmentObject var authManager: AuthenticationManager
+    @EnvironmentObject var subscriptionManager: SubscriptionManager
+    @EnvironmentObject var notificationManager: NotificationManager
+    @Environment(\.dismiss) var dismiss
+    
+    @State private var showingPaywall = false
+    
+    var body: some View {
+        NavigationStack {
+            List {
+                // Account Section
+                Section("Account") {
+                    if let userName = authManager.userName {
+                        HStack {
+                            Text("Name")
+                            Spacer()
+                            Text(userName)
+                                .foregroundColor(.secondary)
+                        }
                     }
-                } else {
-                    print("⚠️ Item not found for snooze action")
+                    
+                    if let userEmail = authManager.userEmail {
+                        HStack {
+                            Text("Email")
+                            Spacer()
+                            Text(userEmail)
+                                .foregroundColor(.secondary)
+                                .lineLimit(1)
+                        }
+                    }
                 }
-            } catch {
-                print("❌ Error handling snooze: \(error.localizedDescription)")
-            }
-        }
-    }
-    
-    /// Handle mark as used action - delete the item
-    private func handleMarkUsedAction(userInfo: [AnyHashable: Any]) {
-        guard let itemIdString = userInfo["itemId"] as? String,
-              let itemId = UUID(uuidString: itemIdString) else {
-            print("⚠️ Invalid item ID in mark used action")
-            return
-        }
-        
-        print("✅ Marking item as used: \(itemId)")
-        
-        Task { @MainActor in
-            // Get model context
-            guard let container = try? ModelContainer(
-                for: Item.self,
-                configurations: ModelConfiguration(isStoredInMemoryOnly: false)
-            ) else {
-                print("❌ Could not access model container")
-                return
-            }
-            
-            let context = container.mainContext
-            let descriptor = FetchDescriptor<Item>(
-                predicate: #Predicate { $0.id == itemId }
-            )
-            
-            do {
-                if let item = try context.fetch(descriptor).first {
-                    // Cancel notification
-                    await NotificationManager.shared.cancelNotification(for: item)
-                    
-                    // Delete item
-                    context.delete(item)
-                    try context.save()
-                    
-                    print("✅ Item marked as used and deleted")
-                    
-                    // Show local notification confirming deletion
-                    showConfirmationNotification(itemName: item.name)
-                } else {
-                    print("⚠️ Item not found for mark used action")
+                
+                // Subscription Section
+                Section("Subscription") {
+                    if subscriptionManager.isPremium {
+                        HStack {
+                            Image(systemName: "crown.fill")
+                                .foregroundColor(.yellow)
+                            Text("Premium Active")
+                                .foregroundColor(.green)
+                        }
+                        
+                        Button("Manage Subscription") {
+                            Task {
+                                await subscriptionManager.showManageSubscriptions()
+                            }
+                        }
+                    } else {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Free Tier")
+                                    .font(.headline)
+                                Text("\(subscriptionManager.remainingScans()) scan\(subscriptionManager.remainingScans() == 1 ? "" : "s") remaining this month")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            Spacer()
+                        }
+                        
+                        Button("Upgrade to Premium") {
+                            showingPaywall = true
+                        }
+                    }
                 }
-            } catch {
-                print("❌ Error handling mark used: \(error.localizedDescription)")
+                
+                // Notifications Settings Section
+                Section("Notifications") {
+                    NavigationLink {
+                        SettingsView() // This is your existing notification settings
+                    } label: {
+                        HStack {
+                            Image(systemName: "bell.fill")
+                                .foregroundColor(.blue)
+                            Text("Notification Preferences")
+                        }
+                    }
+                }
+                
+                // Sign Out
+                Section {
+                    Button("Sign Out", role: .destructive) {
+                        authManager.signOut()
+                        dismiss()
+                    }
+                }
+            }
+            .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+            .sheet(isPresented: $showingPaywall) {
+                PaywallView()
             }
         }
-    }
-    
-    /// Show a confirmation notification
-    private func showConfirmationNotification(itemName: String) {
-        let content = UNMutableNotificationContent()
-        content.title = "Item Used"
-        content.body = "\(itemName) has been removed from your fridge"
-        content.sound = .default
-        
-        let request = UNNotificationRequest(
-            identifier: "confirmation-\(UUID().uuidString)",
-            content: content,
-            trigger: nil
-        )
-        
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error = error {
-                print("❌ Error showing confirmation: \(error.localizedDescription)")
-            }
-        }
-    }
-    
-    // MARK: - Background Refresh
-    
-    func applicationDidEnterBackground(_ application: UIApplication) {
-        print("📱 App entered background")
-        // Any cleanup or state saving can go here
-    }
-    
-    func applicationWillEnterForeground(_ application: UIApplication) {
-        print("📱 App will enter foreground")
-        // Refresh data if needed
     }
 }

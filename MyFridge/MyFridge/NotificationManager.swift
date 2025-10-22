@@ -191,7 +191,7 @@ class NotificationManager: ObservableObject {
             content.title = "🍽️ Item Expiring Soon"
             content.body = "\(item.name) expires in \(lead) \(daysText)"
             content.sound = .default
-            content.badge = NSNumber(value: 1)
+            // Removed: content.badge = NSNumber(value: 1)
             content.categoryIdentifier = "EXPIRY_REMINDER"
             content.userInfo = [
                 "itemId": item.id.uuidString,
@@ -249,7 +249,7 @@ class NotificationManager: ObservableObject {
         content.title = "🍽️ MyFridge Daily Digest"
         content.body = "Check your fridge for items expiring soon"
         content.sound = .default
-        content.badge = NSNumber(value: 1)
+        // Removed: content.badge = NSNumber(value: 1)
         content.categoryIdentifier = "DAILY_DIGEST"
         content.threadIdentifier = "daily-digest"
         
@@ -430,7 +430,6 @@ extension NotificationManager {
         print("📅 Scheduling notifications for \(items.count) items...")
         
         var successCount = 0
-        var failureCount = 0
         
         for item in items {
             guard !item.isExpired else {

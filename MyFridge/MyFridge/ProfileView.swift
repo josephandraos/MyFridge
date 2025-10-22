@@ -24,10 +24,6 @@ struct ProfileView: View {
         items.filter { !$0.isExpired }
     }
     
-    private var sortedItemsByDate: [Item] {
-        items.sorted { $0.addedDate > $1.addedDate }
-    }
-    
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -92,55 +88,6 @@ struct ProfileView: View {
                         }
                     }
                     .padding(.horizontal, 20)
-                    
-                    // History Section
-                    VStack(alignment: .leading, spacing: 16) {
-                        HStack {
-                            Image(systemName: "clock.arrow.circlepath")
-                                .font(.system(size: 20, weight: .semibold))
-                                .foregroundStyle(.blue)
-                            
-                            Text("History")
-                                .font(.system(size: 22, weight: .bold))
-                                .foregroundStyle(.primary)
-                            
-                            Spacer()
-                        }
-                        .padding(.horizontal, 20)
-                        
-                        if sortedItemsByDate.isEmpty {
-                            VStack(spacing: 12) {
-                                Image(systemName: "tray")
-                                    .font(.system(size: 50))
-                                    .foregroundStyle(.secondary)
-                                
-                                Text("No items yet")
-                                    .font(.system(size: 17, weight: .medium))
-                                    .foregroundStyle(.secondary)
-                                
-                                Text("Start adding items to see your history")
-                                    .font(.system(size: 14))
-                                    .foregroundStyle(.tertiary)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 40)
-                        } else {
-                            VStack(spacing: 12) {
-                                ForEach(sortedItemsByDate.prefix(10)) { item in
-                                    HistoryItemRow(item: item)
-                                }
-                            }
-                            .padding(.horizontal, 20)
-                            
-                            if sortedItemsByDate.count > 10 {
-                                Text("Showing 10 most recent items")
-                                    .font(.system(size: 13))
-                                    .foregroundStyle(.secondary)
-                                    .padding(.top, 8)
-                            }
-                        }
-                    }
-                    .padding(.top, 8)
                     
                     // Premium/Subscription Section
                     VStack(alignment: .leading, spacing: 16) {
@@ -273,53 +220,6 @@ struct StatCard: View {
             RoundedRectangle(cornerRadius: 16)
                 .fill(Color(.systemBackground))
                 .shadow(color: .black.opacity(0.05), radius: 8, y: 2)
-        )
-    }
-}
-
-// MARK: - History Item Row
-struct HistoryItemRow: View {
-    let item: Item
-    
-    var body: some View {
-        HStack(spacing: 12) {
-            Text(ItemEmojiHelper.emoji(for: item.name))
-                .font(.system(size: 28))
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(item.name)
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(.primary)
-                
-                Text("Added \(item.addedDate, format: .dateTime.month().day().year())")
-                    .font(.system(size: 13))
-                    .foregroundStyle(.secondary)
-            }
-            
-            Spacer()
-            
-            // Status badge
-            HStack(spacing: 4) {
-                Circle()
-                    .fill(item.isExpired ? .red : .green)
-                    .frame(width: 6, height: 6)
-                
-                Text(item.isExpired ? "Expired" : "Fresh")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(item.isExpired ? .red : .green)
-            }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
-            .background(
-                Capsule()
-                    .fill((item.isExpired ? Color.red : Color.green).opacity(0.12))
-            )
-        }
-        .padding(14)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemBackground))
-                .shadow(color: .black.opacity(0.05), radius: 4, y: 2)
         )
     }
 }

@@ -2,7 +2,7 @@
 //  ReceiptScannerView.swift
 //  MyFridge
 //
-//  Receipt scanner using DataScannerViewController
+//  Receipt scanner with scan limit checking for free tier
 //
 
 import SwiftUI
@@ -14,6 +14,7 @@ struct ReceiptScannerView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var notificationManager: NotificationManager
+    @EnvironmentObject var subscriptionManager: SubscriptionManager
     
     @State private var scannedText = ""
     @State private var isScanning = true
@@ -21,7 +22,8 @@ struct ReceiptScannerView: View {
     @State private var parsedItems: [ParsedItem] = []
     @State private var showError = false
     @State private var errorMessage = ""
-    @State private var scanProgress = 0
+    @State private var showLimitReached = false
+    @State private var showPaywall = false
     
     var body: some View {
         ZStack {
@@ -52,6 +54,16 @@ struct ReceiptScannerView: View {
                 )
             }
         }
+        .alert("Scan Limit Reached", isPresented: $showLimitReached) {
+            Button("Upgrade to Premium") {
+                showPaywall = true
+            }
+            Button("Cancel", role: .cancel) {
+                dismiss()
+            }
+        } message: {
+            Text("You've used your free scan for this month. Upgrade to Premium for unlimited scans!")
+        }
         .alert("Scanning Error", isPresented: $showError) {
             Button("Try Again") {
                 scannedText = ""
@@ -63,7 +75,20 @@ struct ReceiptScannerView: View {
         } message: {
             Text(errorMessage)
         }
+        .sheet(isPresented: $showPaywall) {
+            PaywallView()
+        }
         .onAppear {
+            checkScanLimit()
+        }
+    }
+    
+    // MARK: - Check Scan Limit
+    
+    private func checkScanLimit() {
+        if !subscriptionManager.canUserScan() {
+            showLimitReached = true
+        } else {
             isScanning = true
         }
     }
@@ -83,10 +108,20 @@ struct ReceiptScannerView: View {
                 
                 Spacer()
                 
-                Text("Scan Your Receipt")
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .shadow(color: .black.opacity(0.5), radius: 4)
+                VStack(spacing: 2) {
+                    Text("Scan Your Receipt")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .shadow(color: .black.opacity(0.5), radius: 4)
+                    
+                    // Show scan count for free users
+                    if !subscriptionManager.isPremium {
+                        Text("Scans left: \(subscriptionManager.remainingScans())")
+                            .font(.system(size: 13))
+                            .foregroundStyle(.yellow)
+                            .shadow(color: .black.opacity(0.5), radius: 4)
+                    }
+                }
                 
                 Spacer()
                 
@@ -249,6 +284,9 @@ struct ReceiptScannerView: View {
                 }
             }
         }
+        
+        // Increment scan count for free tier users
+        subscriptionManager.incrementScanCount()
         
         print("✅ Saved \(selectedItems.count) items from receipt scan")
         dismiss()
@@ -525,6 +563,7 @@ struct ItemRowEditor: View {
         ReceiptScannerView()
             .modelContainer(for: Item.self, inMemory: true)
             .environmentObject(NotificationManager.shared)
+            .environmentObject(SubscriptionManager())
     } else {
         Text("Receipt Scanner requires iOS 16+")
     }

@@ -3,11 +3,18 @@
 //  MyFridge
 //
 //  Receipt parsing logic for scanning grocery receipts
+//  UPGRADED VERSION - Better OCR handling, French support, fuzzy matching
 //
 
 import Foundation
 
 struct ReceiptParser {
+    
+    // MARK: - Configuration
+    
+    private static let minLineScore: Double = 3.0  // Lines below this score are ignored
+    private static let minItemNameLength = 3
+    private static let maxItemNameLength = 50
     
     // MARK: - Canadian Brand Database
     // Maps brand names (as they appear on receipts) to generic product name and category
@@ -284,8 +291,8 @@ struct ReceiptParser {
         "vitae farms eggs": ("Eggs", .dairy),
         "omega pro eggs": ("Omega-3 Eggs", .dairy),
         "egglicious eggs": ("Eggs", .dairy),
-        "Oeuf": ("Eggs", .dairy),
-        "Oeufs": ("Eggs", .dairy),
+        "oeuf": ("Eggs", .dairy),
+        "oeufs": ("Eggs", .dairy),
         
         // Store Brands
         "presidents choice eggs": ("Eggs", .dairy),
@@ -566,6 +573,7 @@ struct ReceiptParser {
         "yellow peppers": ("Bell Peppers", .vegetables),
         "orange peppers": ("Bell Peppers", .vegetables),
         "jalapeño": ("Jalapeño", .vegetables),
+        "jalapeno": ("Jalapeño", .vegetables),
         "serrano": ("Serrano Pepper", .vegetables),
         "zucchini": ("Zucchini", .vegetables),
         "yellow squash": ("Squash", .vegetables),
@@ -599,6 +607,29 @@ struct ReceiptParser {
         "coleslaw mix": ("Coleslaw Mix", .vegetables),
         "arugula": ("Arugula", .vegetables),
         "watercress": ("Watercress", .vegetables),
+        
+        // French vegetable names
+        "concombres": ("Cucumber", .vegetables),
+        "concombre": ("Cucumber", .vegetables),
+        "tomates": ("Tomato", .vegetables),
+        "tomate": ("Tomato", .vegetables),
+        "carottes": ("Carrot", .vegetables),
+        "carotte": ("Carrot", .vegetables),
+        "laitue": ("Lettuce", .vegetables),
+        "poivrons": ("Bell Pepper", .vegetables),
+        "poivron": ("Bell Pepper", .vegetables),
+        "oignons": ("Onion", .vegetables),
+        "oignon": ("Onion", .vegetables),
+        "pommes de terre": ("Potato", .vegetables),
+        "patate": ("Potato", .vegetables),
+        "brocoli": ("Broccoli", .vegetables),
+        "chou-fleur": ("Cauliflower", .vegetables),
+        "epinards": ("Spinach", .vegetables),
+        "champignons": ("Mushroom", .vegetables),
+        "ail": ("Garlic", .vegetables),
+        "celeri": ("Celery", .vegetables),
+        "courgette": ("Zucchini", .vegetables),
+        "aubergine": ("Eggplant", .vegetables),
         
         // ============================================
         // FRUIT BRANDS
@@ -676,7 +707,6 @@ struct ReceiptParser {
         "apricots": ("Apricot", .fruits),
 
         // Citrus
-        "oranges": ("Orange", .fruits),
         "navel oranges": ("Orange", .fruits),
         "clementines": ("Clementine", .fruits),
         "mandarins": ("Mandarin", .fruits),
@@ -698,6 +728,25 @@ struct ReceiptParser {
         "dates": ("Dates", .fruits),
         "persimmons": ("Persimmon", .fruits),
 
+        // French fruit names
+        "bananes": ("Banana", .fruits),
+        "banane": ("Banana", .fruits),
+        "pommes": ("Apple", .fruits),
+        "pomme": ("Apple", .fruits),
+        "oranges": ("Orange", .fruits),
+        "fraises": ("Strawberry", .fruits),
+        "fraise": ("Strawberry", .fruits),
+        "raisins": ("Grapes", .fruits),
+        "citrons": ("Lemon", .fruits),
+        "citron": ("Lemon", .fruits),
+        "peches": ("Peach", .fruits),
+        "poires": ("Pear", .fruits),
+        "cerises": ("Cherry", .fruits),
+        "mangue": ("Mango", .fruits),
+        "ananas": ("Pineapple", .fruits),
+        "melon d'eau": ("Watermelon", .fruits),
+        "avocat": ("Avocado", .fruits),
+        "avocats": ("Avocado", .fruits),
 
         // Canned / Jarred / Packaged Fruit
         "dole fruit cups": ("Fruit Cup", .fruits),
@@ -1002,6 +1051,19 @@ struct ReceiptParser {
         "lamb shank": ("Lamb Shank", .meat),
         "ground lamb": ("Ground Lamb", .meat),
         
+        // French meat names
+        "poulet": ("Chicken", .meat),
+        "boeuf": ("Beef", .meat),
+        "porc": ("Pork", .meat),
+        "poisson": ("Fish", .meat),
+        "saumon": ("Salmon", .meat),
+        "thon": ("Tuna", .meat),
+        "crevettes": ("Shrimp", .meat),
+        "viande": ("Meat", .meat),
+        "jambon": ("Ham", .meat),
+        "bacon": ("Bacon", .meat),
+        "saucisse": ("Sausage", .meat),
+        
         // ============================================
         // BREAD & BAKERY BRANDS
         // ============================================
@@ -1165,7 +1227,6 @@ struct ReceiptParser {
         "ciabatta rolls": ("Ciabatta", .bakery),
         "croissants": ("Croissants", .bakery),
         "pastries": ("Pastries", .bakery),
-        "muffins": ("Muffins", .bakery),
         "cakes": ("Cakes", .bakery),
         "pies": ("Pies", .bakery),
         "donuts": ("Donuts", .bakery),
@@ -1176,12 +1237,10 @@ struct ReceiptParser {
         "flatbread": ("Flatbread", .bakery),
         "rolls": ("Rolls", .bakery),
         "garlic bread": ("Garlic Bread", .bakery),
-        "baguette": ("Baguette", .bakery),
         "french bread": ("French Bread", .bakery),
         "italian bread": ("Italian Bread", .bakery),
         "pumpernickel": ("Pumpernickel", .bakery),
         "challah": ("Challah", .bakery),
-        "brioche": ("Brioche", .bakery),
         "focaccia": ("Focaccia", .bakery),
         "pretzel buns": ("Pretzel Buns", .bakery),
         "texas toast": ("Texas Toast", .bakery),
@@ -1189,6 +1248,14 @@ struct ReceiptParser {
         "croutons": ("Croutons", .bakery),
         "panko": ("Panko", .bakery),
         "stuffing": ("Stuffing", .bakery),
+        
+        // French bakery names
+        "pain": ("Bread", .bakery),
+        "croissant": ("Croissant", .bakery),
+        "baguette": ("Baguette", .bakery),
+        "brioche": ("Brioche", .bakery),
+        "gateau": ("Cake", .bakery),
+        "muffins": ("Muffins", .bakery),
         
         // ============================================
         // BEVERAGES (DRINKS)
@@ -1490,6 +1557,16 @@ struct ReceiptParser {
         "orange juice": ("Orange Juice", .beverages),
         "apple juice": ("Apple Juice", .beverages),
         "smoothie": ("Smoothie", .beverages),
+        
+        // French beverage names
+        "jus": ("Juice", .beverages),
+        "jus d'orange": ("Orange Juice", .beverages),
+        "jus de pomme": ("Apple Juice", .beverages),
+        "eau": ("Water", .beverages),
+        "cafe": ("Coffee", .beverages),
+        "the": ("Tea", .beverages),
+        "boisson": ("Beverage", .beverages),
+        "lait au chocolat": ("Chocolate Milk", .beverages),
         
         // ============================================
         // SNACKS & CONDIMENTS
@@ -1850,6 +1927,43 @@ struct ReceiptParser {
         "mints": ("Mints", .snacks),
         "pretzels": ("Pretzels", .snacks),
         
+        // French snack names
+        "croustilles": ("Chips", .snacks),
+        "biscuits": ("Cookies", .snacks),
+        "bonbons": ("Candy", .snacks),
+        "chocolat": ("Chocolate", .snacks),
+        "noix": ("Nuts", .snacks),
+        "arachides": ("Peanuts", .snacks),
+    ]
+    
+    // MARK: - Common Abbreviations (Costco/Store abbreviations)
+    
+    private static let commonAbbreviations: [String: String] = [
+        // Store brands
+        "ks": "kirkland signature",
+        "pc": "presidents choice",
+        "gv": "great value",
+        "nn": "no name",
+        
+        // Common words
+        "org": "organic",
+        "bio": "organic",
+        "nat": "natural",
+        "frzn": "frozen",
+        "frsh": "fresh",
+        "unslt": "unsalted",
+        "slt": "salted",
+        "choc": "chocolate",
+        "straw": "strawberry",
+        "rasp": "raspberry",
+        "blue": "blueberry",
+        "van": "vanilla",
+        
+        // Measurements (not quantities)
+        "lb": "pound",
+        "kg": "kilogram",
+        "ml": "milliliter",
+        "oz": "ounce",
     ]
     
     // MARK: - Whitelist of Recognized Food Items (Fallback)
@@ -1859,10 +1973,10 @@ struct ReceiptParser {
         ("Milk", .dairy, ["milk", "lait", "whole milk", "skim milk", "2%", "1%"]),
         ("Butter", .dairy, ["butter", "beurre"]),
         ("Cheese", .dairy, ["cheese", "fromage", "cheddar", "mozzarella", "parmesan", "swiss"]),
-        ("Ice Cream", .dairy, ["ice cream", "crème glacée", "gelato"]),
+        ("Ice Cream", .dairy, ["ice cream", "creme glacee", "gelato"]),
         ("Eggs", .dairy, ["egg", "eggs", "oeuf", "oeufs"]),
         ("Yogurt", .dairy, ["yogurt", "yogourt", "yoghurt"]),
-        ("Cream", .dairy, ["cream", "crème", "heavy cream", "whipping cream"]),
+        ("Cream", .dairy, ["cream", "creme", "heavy cream", "whipping cream"]),
         
         // MEAT & FISH
         ("Chicken", .meat, ["chicken", "poulet"]),
@@ -1885,7 +1999,7 @@ struct ReceiptParser {
         ("Orange", .fruits, ["orange"]),
         ("Watermelon", .fruits, ["watermelon", "melon d'eau"]),
         ("Lemon", .fruits, ["lemon", "citron"]),
-        ("Peach", .fruits, ["peach", "pêche"]),
+        ("Peach", .fruits, ["peach", "peche"]),
         ("Cherry", .fruits, ["cherry", "cherries", "cerise"]),
         ("Pear", .fruits, ["pear", "poire"]),
         ("Pineapple", .fruits, ["pineapple", "ananas"]),
@@ -1900,7 +2014,7 @@ struct ReceiptParser {
         ("Cucumber", .vegetables, ["cucumber", "concombre"]),
         ("Tomato", .vegetables, ["tomato", "tomatoes", "tomate"]),
         ("Lettuce", .vegetables, ["lettuce", "laitue", "salad", "salade"]),
-        ("Corn", .vegetables, ["corn", "maïs"]),
+        ("Corn", .vegetables, ["corn", "mais"]),
         ("Broccoli", .vegetables, ["broccoli", "brocoli"]),
         ("Garlic", .vegetables, ["garlic", "ail"]),
         ("Onion", .vegetables, ["onion", "oignon"]),
@@ -1908,8 +2022,8 @@ struct ReceiptParser {
         ("Mushroom", .vegetables, ["mushroom", "champignon"]),
         ("Pepper", .vegetables, ["pepper", "peppers", "bell pepper", "poivron"]),
         ("Eggplant", .vegetables, ["eggplant", "aubergine"]),
-        ("Spinach", .vegetables, ["spinach", "épinard"]),
-        ("Celery", .vegetables, ["celery", "céleri"]),
+        ("Spinach", .vegetables, ["spinach", "epinard"]),
+        ("Celery", .vegetables, ["celery", "celeri"]),
         
         // BREAD & BAKERY
         ("Bread", .bakery, ["bread", "pain"]),
@@ -1918,63 +2032,28 @@ struct ReceiptParser {
         ("Bagel", .bakery, ["bagel"]),
         ("Muffin", .bakery, ["muffin"]),
         ("Cookie", .bakery, ["cookie", "cookies", "biscuit"]),
-        ("Cake", .bakery, ["cake", "gâteau"]),
+        ("Cake", .bakery, ["cake", "gateau"]),
         ("Donut", .bakery, ["donut", "doughnut", "beignet"]),
         ("Pretzel", .bakery, ["pretzel"]),
         ("Roll", .bakery, ["roll", "rolls"]),
         
-        // PREPARED FOODS
-        ("Pizza", .prepared, ["pizza"]),
-        ("Burger", .prepared, ["burger", "hamburger"]),
-        ("Sandwich", .prepared, ["sandwich"]),
-        ("Hot Dog", .prepared, ["hot dog", "hotdog"]),
-        ("Taco", .prepared, ["taco"]),
-        ("Burrito", .prepared, ["burrito"]),
-        ("Pasta", .prepared, ["pasta", "pâtes", "spaghetti"]),
-        ("Curry", .prepared, ["curry"]),
-        ("Sushi", .prepared, ["sushi"]),
-        ("Ramen", .prepared, ["ramen", "noodle", "nouille"]),
-        ("Rice", .prepared, ["rice", "riz"]),
-        ("Wrap", .prepared, ["wrap"]),
-        ("Soup", .prepared, ["soup", "soupe"]),
-        
         // BEVERAGES
-        ("Coffee", .beverages, ["coffee", "café"]),
-        ("Latte", .beverages, ["latte"]),
-        ("Cappuccino", .beverages, ["cappuccino", "cappu"]),
-        ("Espresso", .beverages, ["espresso"]),
-        ("Americano", .beverages, ["americano"]),
-        ("Mocha", .beverages, ["mocha"]),
-        ("Tea", .beverages, ["tea", "thé"]),
+        ("Coffee", .beverages, ["coffee", "cafe"]),
+        ("Tea", .beverages, ["tea", "the"]),
         ("Juice", .beverages, ["juice", "jus"]),
         ("Soda", .beverages, ["soda", "pop"]),
         ("Water", .beverages, ["water", "eau"]),
-        ("Smoothie", .beverages, ["smoothie"]),
-        ("Wine", .beverages, ["wine", "vin"]),
-        ("Beer", .beverages, ["beer", "bière"]),
         
         // SNACKS & CONDIMENTS
         ("Chocolate", .snacks, ["chocolate", "chocolat"]),
         ("Chips", .snacks, ["chips", "croustilles"]),
         ("Crackers", .snacks, ["crackers"]),
-        ("Popcorn", .snacks, ["popcorn", "maïs soufflé"]),
+        ("Popcorn", .snacks, ["popcorn", "mais souffle"]),
         ("Candy", .snacks, ["candy", "bonbon"]),
         ("Peanuts", .snacks, ["peanut", "peanuts", "arachide"]),
-        ("Salt", .snacks, ["salt", "sel"]),
         ("Ketchup", .snacks, ["ketchup"]),
         ("Honey", .snacks, ["honey", "miel"]),
-        
-        // FROZEN FOODS
-        ("Frozen Pizza", .frozen, ["frozen pizza"]),
-        ("Ice", .frozen, ["ice", "glace"]),
-        ("Dumpling", .frozen, ["dumpling", "dumplings"]),
-        
-        
-        
-        
     ]
-    
-    
     
     // MARK: - Main Parsing Function
     
@@ -1983,13 +2062,21 @@ struct ReceiptParser {
         var items: [ParsedItem] = []
         let lines = text.components(separatedBy: .newlines)
         
+        // DEBUG: Uncomment to see raw OCR output
+        // print("========== RAW OCR OUTPUT ==========")
+        // for (index, line) in lines.enumerated() {
+        //     print("\(index): '\(line)'")
+        // }
+        // print("====================================")
+        
         for line in lines {
             // Clean up the line
             let cleanLine = line.trimmingCharacters(in: .whitespaces)
             guard !cleanLine.isEmpty else { continue }
             
-            // Skip obvious non-item lines first (performance optimization)
-            if shouldSkipLine(cleanLine) {
+            // Score the line - only process lines with good scores
+            let score = scoreLine(cleanLine)
+            if score < minLineScore {
                 continue
             }
             
@@ -2011,14 +2098,129 @@ struct ReceiptParser {
         return items
     }
     
-    // MARK: - Brand Matching
+    // MARK: - Line Scoring System (replaces shouldSkipLine)
     
-    private static func matchCanadianBrand(from line: String) -> ParsedItem? {
+    /// Score a line based on how likely it is to be a grocery item
+    /// Higher scores = more likely to be a real item
+    private static func scoreLine(_ line: String) -> Double {
+        var score = 5.0  // Start with baseline score
         let lowercaseLine = line.lowercased()
         
-        // Try to find exact brand match
-        for (brandKey, brandInfo) in canadianBrands {
+        // POSITIVE SIGNALS (add points)
+        
+        // Has a price pattern (strong signal)
+        if containsPrice(line) {
+            score += 3.0
+        }
+        
+        // Has quantity pattern
+        if containsQuantityPattern(line) {
+            score += 2.0
+        }
+        
+        // Contains known brand or food keyword
+        for (brandKey, _) in canadianBrands {
             if lowercaseLine.contains(brandKey) {
+                score += 5.0
+                break
+            }
+        }
+        
+        // Contains food keyword from whitelist
+        for food in recognizedFoods {
+            for keyword in food.keywords {
+                if lowercaseLine.contains(keyword) {
+                    score += 4.0
+                    break
+                }
+            }
+        }
+        
+        // Good length (typical item names are 5-40 characters)
+        if line.count >= 5 && line.count <= 40 {
+            score += 1.0
+        }
+        
+        // NEGATIVE SIGNALS (subtract points)
+        
+        // Too many numbers (likely transaction ID, phone, etc.)
+        let digitCount = line.filter { $0.isNumber }.count
+        let letterCount = line.filter { $0.isLetter }.count
+        if digitCount > letterCount && digitCount > 5 {
+            score -= 5.0
+        }
+        
+        // Contains receipt/store keywords
+        let skipKeywords = [
+            "total", "subtotal", "tax", "tps", "tvq", "balance",
+            "payment", "card", "credit", "debit", "visa", "mastercard",
+            "store", "cashier", "thank", "merci", "receipt", "invoice",
+            "date", "time", "address", "phone", "www", ".com"
+        ]
+        
+        for keyword in skipKeywords {
+            if lowercaseLine.contains(keyword) {
+                score -= 10.0
+                break
+            }
+        }
+        
+        // Too many symbols
+        let symbolCount = line.filter { !$0.isLetter && !$0.isNumber && !$0.isWhitespace }.count
+        if Double(symbolCount) / Double(line.count) > 0.4 {
+            score -= 3.0
+        }
+        
+        // Too short
+        if line.count < 3 {
+            score -= 5.0
+        }
+        
+        // All caps with lots of spaces (likely header)
+        if line == line.uppercased() && line.filter({ $0 == " " }).count > 5 {
+            score -= 2.0
+        }
+        
+        return score
+    }
+    
+    // MARK: - Brand Matching with Fuzzy Logic
+    
+    private static func matchCanadianBrand(from line: String) -> ParsedItem? {
+        // Normalize the line: remove diacritics, lowercase, expand abbreviations
+        let normalizedLine = normalizeLine(line)
+        
+        // Try exact brand match first
+        for (brandKey, brandInfo) in canadianBrands {
+            if normalizedLine.contains(brandKey) {
+                let quantity = extractQuantity(from: line)
+                
+                return ParsedItem(
+                    name: brandInfo.product,
+                    quantity: quantity,
+                    isSelected: true,
+                    estimatedCategory: brandInfo.category
+                )
+            }
+        }
+        
+        // Try partial matching for common patterns
+        // Example: "LAC MILK" should match "lactantia milk"
+        let words = normalizedLine.components(separatedBy: .whitespaces).filter { !$0.isEmpty }
+        
+        for (brandKey, brandInfo) in canadianBrands {
+            let brandWords = brandKey.components(separatedBy: .whitespaces)
+            
+            // If line contains all words from brand (in any order)
+            let matchCount = brandWords.filter { brandWord in
+                words.contains { lineWord in
+                    // Fuzzy match: line word starts with brand word or vice versa
+                    lineWord.hasPrefix(brandWord) || brandWord.hasPrefix(lineWord)
+                }
+            }.count
+            
+            // If we matched at least 70% of brand words, it's a match
+            if Double(matchCount) / Double(brandWords.count) >= 0.7 {
                 let quantity = extractQuantity(from: line)
                 
                 return ParsedItem(
@@ -2033,17 +2235,43 @@ struct ReceiptParser {
         return nil
     }
     
+    // MARK: - Line Normalization (Diacritic Folding + Abbreviation Expansion)
+    
+    private static func normalizeLine(_ line: String) -> String {
+        var normalized = line.lowercased()
+        
+        // Remove diacritics (é → e, è → e, ê → e, ç → c, etc.)
+        normalized = normalized.folding(options: .diacriticInsensitive, locale: .current)
+        
+        // Expand common abbreviations
+        for (abbrev, expansion) in commonAbbreviations {
+            // Use word boundaries to avoid false matches
+            let pattern = "\\b\(abbrev)\\b"
+            if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive) {
+                normalized = regex.stringByReplacingMatches(
+                    in: normalized,
+                    range: NSRange(normalized.startIndex..., in: normalized),
+                    withTemplate: expansion
+                )
+            }
+        }
+        
+        return normalized
+    }
+    
     // MARK: - Whitelist Matching (Fallback)
     
     private static func matchRecognizedFood(from line: String) -> ParsedItem? {
-        let lowercaseLine = line.lowercased()
+        let normalizedLine = normalizeLine(line)
         
         // Try to match against each recognized food item
         for food in recognizedFoods {
             // Check if any of the keywords match
             for keyword in food.keywords {
-                if lowercaseLine.contains(keyword) {
-                    // Found a match! Extract quantity and clean up the name
+                let normalizedKeyword = keyword.folding(options: .diacriticInsensitive, locale: .current)
+                
+                if normalizedLine.contains(normalizedKeyword) {
+                    // Found a match! Extract quantity
                     let quantity = extractQuantity(from: line)
                     
                     return ParsedItem(
@@ -2061,74 +2289,45 @@ struct ReceiptParser {
     
     // MARK: - Helper Functions
     
-    private static func shouldSkipLine(_ line: String) -> Bool {
-        let lowercaseLine = line.lowercased()
-        
-        // Skip lines with store/receipt keywords
-        let skipKeywords = [
-            // Store info
-            "store", "shop", "market", "restaurant", "address", "avenue", "street", "blvd", "road",
-            "phone", "tel:", "fax:", "email", "website", "www", ".com",
-            
-            // Receipt structure
-            "receipt", "invoice", "bill", "order", "commande", "transaction", "command",
-            
-            // Employee/register
-            "cashier", "caissier", "employee", "employé", "register", "terminal",
-            
-            // Payment
-            "payment", "paiement", "card", "carte", "credit", "debit", "cash", "change", "monnaie",
-            "master", "visa", "amex", "interac", "mastercard",
-            
-            // Totals and taxes
-            "subtotal", "sous-total", "total", "tax", "tps", "tvq", "balance", "amount", "montant",
-            
-            // Other receipt elements
-            "thank", "merci", "visit", "date", "time", "code", "qr", "barcode",
-            
-            // Common separators
-            "***", "---", "===", "______", "......",
-            
-            // Location/administrative
-            "québec", "quebec", "laval", "montreal", "canada", "centropolis"
+    private static func containsPrice(_ text: String) -> Bool {
+        // Matches: $12.99, 12.99, 12,99, 12 99, $12,99, etc.
+        let pricePatterns = [
+            #"\$?\d+[.,]\d{2}"#,      // $12.99 or 12,99
+            #"\$?\d+\s\d{2}\b"#,       // 12 99
+            #"\d+[.,]\d{2}\s*\$"#      // 12.99$
         ]
         
-        for keyword in skipKeywords {
-            if lowercaseLine.contains(keyword) {
+        for pattern in pricePatterns {
+            if let _ = try? NSRegularExpression(pattern: pattern).firstMatch(in: text, range: NSRange(text.startIndex..., in: text)) {
                 return true
             }
         }
         
-        // Skip lines that are mostly numbers (transaction IDs, phone numbers, etc.)
-        let digitCount = line.filter { $0.isNumber }.count
-        let letterCount = line.filter { $0.isLetter }.count
+        return false
+    }
+    
+    private static func containsQuantityPattern(_ text: String) -> Bool {
+        let qtyPatterns = [
+            #"\d+\s*[xX]\b"#,      // 2x, 3 X
+            #"\b[xX]\s*\d+"#,      // x2, X 3
+            #"\bQTY\s*:?\s*\d+"#,  // QTY: 2
+            #"\d+\s*EA\b"#,        // 2 EA
+            #"\d+[.,]\d*\s*(DZ|L|KG|LB)\b"#  // 2.5 DZ, 4L
+        ]
         
-        if digitCount > letterCount && digitCount > 4 {
-            return true
-        }
-        
-        // Skip very short lines (codes, abbreviations)
-        if line.count < 3 {
-            return true
-        }
-        
-        // Skip lines with too many symbols
-        let symbolCount = line.filter { !$0.isLetter && !$0.isNumber && !$0.isWhitespace }.count
-        if Double(symbolCount) / Double(line.count) > 0.4 {
-            return true
+        for pattern in qtyPatterns {
+            if let _ = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive).firstMatch(in: text, range: NSRange(text.startIndex..., in: text)) {
+                return true
+            }
         }
         
         return false
     }
     
     private static func extractQuantity(from text: String) -> Int {
-        // CRITICAL: For Costco/similar receipts, SKIP the item ID at the start
-        // Format: [ITEM_ID] [DESCRIPTION] [PRICE]
-        
+        // CRITICAL: Skip leading item IDs (5-7 digits)
         let trimmed = text.trimmingCharacters(in: .whitespaces)
         
-        // Skip leading item IDs (5-7 digits followed by space)
-        // This prevents treating "30669 BANANES" as quantity=30669
         var workingText = trimmed
         if let regex = try? NSRegularExpression(pattern: #"^\d{4,7}\s+"#),
            let match = regex.firstMatch(in: trimmed, range: NSRange(trimmed.startIndex..., in: trimmed)),
@@ -2138,13 +2337,13 @@ struct ReceiptParser {
         
         // NOW look for quantity patterns in the DESCRIPTION part only
         let patterns = [
-            #"(\d+\.?\d*)\s*(DZ|DOZ|DOZEN)"#,  // "2.5 DZ" (dozen)
-            #"(\d+\.?\d*)\s*L\b"#,              // "4.3L" (liters)
-            #"(\d+\.?\d*)\s*KG"#,               // "2.5KG" (kilograms)
-            #"(\d+\.?\d*)\s*LB"#,               // "3.2LB" (pounds)
-            #"\bQTY\s*:?\s*(\d+)"#,             // "QTY: 2" or "QTY 2"
-            #"\b(\d+)\s*X\b"#,                  // "2 X" or "2X"
-            #"\bX\s*(\d+)\b"#,                  // "X 2"
+            #"(\d+\.?\d*)\s*(DZ|DOZ|DOZEN)"#,  // "2.5 DZ"
+            #"(\d+\.?\d*)\s*L\b"#,              // "4.3L"
+            #"(\d+\.?\d*)\s*KG"#,               // "2.5KG"
+            #"(\d+\.?\d*)\s*LB"#,               // "3.2LB"
+            #"\bQTY\s*:?\s*(\d+)"#,             // "QTY: 2"
+            #"\b(\d+)\s*[xX]\b"#,               // "2 X"
+            #"\b[xX]\s*(\d+)\b"#,               // "X 2"
             #"\b(\d+)\s*EA\b"#,                 // "2 EA"
         ]
         
@@ -2153,24 +2352,24 @@ struct ReceiptParser {
                let match = regex.firstMatch(in: workingText, range: NSRange(workingText.startIndex..., in: workingText)),
                let range = Range(match.range(at: 1), in: workingText) {
                 
-                // Extract the numeric value
                 let quantityStr = String(workingText[range])
                 
-                // Handle decimal quantities (e.g., "2.5" for 2.5 dozen)
                 if let quantityDouble = Double(quantityStr) {
-                    // For fractional quantities like "2.5 DZ", round up
                     return Int(ceil(quantityDouble))
                 }
             }
         }
         
-        return 1 // Default: if no quantity found in description, assume 1
+        return 1  // Default
     }
+    
     private static func mergeDuplicates(_ items: [ParsedItem]) -> [ParsedItem] {
         var merged: [String: ParsedItem] = [:]
         
         for item in items {
-            let key = item.name.lowercased()
+            // Use normalized name as key for better merging
+            let key = item.name.lowercased().folding(options: .diacriticInsensitive, locale: .current)
+            
             if var existingItem = merged[key] {
                 existingItem.quantity += item.quantity
                 merged[key] = existingItem
@@ -2185,18 +2384,18 @@ struct ReceiptParser {
     // MARK: - Category Inference
     
     static func inferCategory(from name: String) -> ItemCategory {
-        let lowercaseName = name.lowercased()
+        let normalizedName = name.lowercased().folding(options: .diacriticInsensitive, locale: .current)
         
         // Check brand database first
         for (_, brandInfo) in canadianBrands {
-            if brandInfo.product.lowercased() == lowercaseName {
+            if brandInfo.product.lowercased().folding(options: .diacriticInsensitive, locale: .current) == normalizedName {
                 return brandInfo.category
             }
         }
         
         // Find matching food in whitelist
         for food in recognizedFoods {
-            if food.name.lowercased() == lowercaseName {
+            if food.name.lowercased().folding(options: .diacriticInsensitive, locale: .current) == normalizedName {
                 return food.category
             }
         }
@@ -2222,7 +2421,7 @@ struct ReceiptParser {
         case .fruits:
             daysToAdd = 7  // 1 week
         case .meat:
-            daysToAdd = 3  // 3 days (fresh meat)
+            daysToAdd = 3  // 3 days
         case .bakery:
             daysToAdd = 5  // 5 days
         case .prepared:
@@ -2235,7 +2434,7 @@ struct ReceiptParser {
             daysToAdd = 90 // 3 months
         }
         
-        // Adjust based on specific keywords
+        // Adjust based on keywords
         let lowercaseName = name.lowercased()
         var adjustedDays = daysToAdd
         
@@ -2245,7 +2444,7 @@ struct ReceiptParser {
         if lowercaseName.contains("organic") || lowercaseName.contains("bio") {
             adjustedDays = max(3, adjustedDays - 1)
         }
-        if lowercaseName.contains("frozen") || lowercaseName.contains("congelé") {
+        if lowercaseName.contains("frozen") || lowercaseName.contains("congele") {
             adjustedDays = 90
         }
         
