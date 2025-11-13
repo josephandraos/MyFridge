@@ -214,7 +214,7 @@ struct ContentView: View {
             }
             .sheet(isPresented: $showingScanner) {
                 if #available(iOS 16.0, *) {
-                    ReceiptScannerView()
+                    ReceiptScannerViewPro()
                 }
             }
             .alert("Enable Notifications?", isPresented: $showNotificationPermissionAlert) {

@@ -11,9 +11,11 @@ import UserNotifications
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var notificationManager: NotificationManager
+    @EnvironmentObject var authenticationManager: AuthenticationManager
     
     @State private var showingResetAlert = false
     @State private var showingSaveConfirmation = false
+    @State private var showingSignOutAlert = false
     @State private var selectedDigestHour = 9
     @State private var selectedDigestMinute = 0
     
@@ -37,6 +39,9 @@ struct SettingsView: View {
                 
                 // About Section
                 aboutSection
+                
+                // Account Section
+                accountSection
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.large)
@@ -61,6 +66,15 @@ struct SettingsView: View {
                 Button("OK") {}
             } message: {
                 Text("Your notification preferences have been updated successfully.")
+            }
+            .alert("Sign Out", isPresented: $showingSignOutAlert) {
+                Button("Sign Out", role: .destructive) {
+                    authenticationManager.signOut()
+                    dismiss()
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Are you sure you want to sign out? You'll need to sign in again to access your fridge.")
             }
             .onAppear {
                 loadDigestTime()
@@ -431,6 +445,33 @@ struct SettingsView: View {
             }
         } header: {
             Text("About")
+        }
+    }
+    
+    // MARK: - Account Section
+    
+    private var accountSection: some View {
+        Section {
+            Button(role: .destructive, action: { showingSignOutAlert = true }) {
+                HStack {
+                    Image(systemName: "rectangle.portrait.and.arrow.right")
+                        .font(.system(size: 20))
+                        .frame(width: 28)
+                    
+                    Text("Sign Out")
+                        .font(.system(size: 17))
+                }
+            }
+        } header: {
+            Text("Account")
+        } footer: {
+            if let userName = authenticationManager.userName {
+                Text("Signed in as \(userName)")
+            } else if let userEmail = authenticationManager.userEmail {
+                Text("Signed in as \(userEmail)")
+            } else {
+                Text("Sign out of your MyFridge account")
+            }
         }
     }
     
