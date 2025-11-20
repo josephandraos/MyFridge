@@ -2,15 +2,20 @@
 //  ProfileView.swift
 //  MyFridge
 //
-//  Created by Joe Andraos on 2025-10-03.
+//  Updated to include clickable subscription options
 //
 
 import SwiftUI
 import SwiftData
+import StoreKit
 
 struct ProfileView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var subscriptionManager: SubscriptionManager
     @Query private var items: [Item]
+    
+    @State private var selectedProduct: Product?
+    @State private var showingFeatures = false
     
     private var totalItemsAdded: Int {
         items.count
@@ -22,6 +27,14 @@ struct ProfileView: View {
     
     private var freshItems: [Item] {
         items.filter { !$0.isExpired }
+    }
+    
+    private var monthlyProduct: Product? {
+        subscriptionManager.products.first { $0.id.contains("monthly") }
+    }
+    
+    private var yearlyProduct: Product? {
+        subscriptionManager.products.first { $0.id.contains("yearly") }
     }
     
     var body: some View {
@@ -127,42 +140,39 @@ struct ProfileView: View {
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal, 20)
                                 
-                                HStack(spacing: 20) {
-                                    PricingOption(
-                                        title: "Monthly",
-                                        price: "$3",
-                                        period: "/month"
-                                    )
+                                if subscriptionManager.products.isEmpty {
+                                    ProgressView()
+                                        .padding()
+                                } else {
+                                    HStack(spacing: 20) {
+                                        if let monthly = monthlyProduct {
+                                            PricingOptionButton(
+                                                title: "Monthly",
+                                                price: monthly.displayPrice,
+                                                period: "/month"
+                                            ) {
+                                                selectedProduct = monthly
+                                            }
+                                        }
+                                        
+                                        if let yearly = yearlyProduct {
+                                            PricingOptionButton(
+                                                title: "Yearly",
+                                                price: yearly.displayPrice,
+                                                period: "/year",
+                                                badge: "Save $6"
+                                            ) {
+                                                selectedProduct = yearly
+                                            }
+                                        }
+                                    }
+                                    .padding(.top, 8)
                                     
-                                    PricingOption(
-                                        title: "Yearly",
-                                        price: "$30",
-                                        period: "/year",
-                                        badge: "Save $6"
-                                    )
+                                    Text("✨ Tap to unlock premium features")
+                                        .font(.system(size: 14, weight: .medium))
+                                        .foregroundStyle(.secondary)
+                                        .padding(.top, 8)
                                 }
-                                .padding(.top, 8)
-                                
-                                Button(action: {
-                                    // TODO: Implement subscription flow
-                                }) {
-                                    Text("Coming Soon")
-                                        .font(.system(size: 18, weight: .semibold))
-                                        .foregroundStyle(.white)
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 16)
-                                        .background(
-                                            LinearGradient(
-                                                colors: [.gray, .gray.opacity(0.8)],
-                                                startPoint: .leading,
-                                                endPoint: .trailing
-                                            )
-                                        )
-                                        .cornerRadius(12)
-                                }
-                                .disabled(true)
-                                .padding(.horizontal, 20)
-                                .padding(.top, 8)
                             }
                             .padding(.vertical, 24)
                             .background(
@@ -188,6 +198,10 @@ struct ProfileView: View {
                     }
                     .fontWeight(.semibold)
                 }
+            }
+            .sheet(item: $selectedProduct) { product in
+                PremiumFeaturesSheet(product: product)
+                    .environmentObject(subscriptionManager)
             }
         }
     }
@@ -224,52 +238,85 @@ struct StatCard: View {
     }
 }
 
-// MARK: - Pricing Option Component
-struct PricingOption: View {
+// MARK: - Pricing Option Button Component
+struct PricingOptionButton: View {
     let title: String
     let price: String
     let period: String
     var badge: String? = nil
+    let action: () -> Void
     
     var body: some View {
-        VStack(spacing: 8) {
-            if let badge = badge {
-                Text(badge)
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(
-                        Capsule()
-                            .fill(.green)
-                    )
-            }
-            
-            Text(title)
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(.secondary)
-            
-            HStack(alignment: .top, spacing: 0) {
-                Text(price)
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundStyle(.primary)
+        Button(action: action) {
+            VStack(spacing: 8) {
+                // Fixed height container for badge area
+                ZStack {
+                    if let badge = badge {
+                        Text(badge)
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 4)
+                            .background(
+                                Capsule()
+                                    .fill(.green)
+                            )
+                    }
+                }
+                .frame(height: 22)
                 
-                Text(period)
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(.secondary)
-                    .offset(y: 4)
+                Text(title)
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(.white)
+                
+                HStack(alignment: .top, spacing: 2) {
+                    Text(price)
+                        .font(.system(size: 32, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                    
+                    Text(period)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(.white.opacity(0.9))
+                        .offset(y: 6)
+                }
             }
+            .frame(maxWidth: .infinity)
+            .frame(height: 140) // Fixed height for both buttons
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(red: 1.0, green: 0.84, blue: 0.0), // Gold
+                                Color(red: 0.85, green: 0.65, blue: 0.13) // Darker gold
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .shadow(color: Color(red: 1.0, green: 0.84, blue: 0.0).opacity(0.5), radius: 10, y: 5)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(
+                        LinearGradient(
+                            colors: [
+                                Color(red: 1.0, green: 0.95, blue: 0.6),
+                                Color(red: 0.85, green: 0.65, blue: 0.13)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 2
+                    )
+            )
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 16)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemGray6))
-        )
+        .buttonStyle(.plain)
     }
 }
 
 #Preview {
     ProfileView()
         .modelContainer(for: Item.self, inMemory: true)
+        .environmentObject(SubscriptionManager())
 }

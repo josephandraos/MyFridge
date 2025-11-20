@@ -28,156 +28,203 @@ struct ContentView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 0) {
-                    Spacer()
-                        .frame(height: 40)
-                    
-                    Text("MyFridge")
-                        .font(.system(size: 42, weight: .bold, design: .rounded))
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: [.blue, .blue.opacity(0.7)],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
+            VStack(spacing: 0) {
+                Spacer()
+                    .frame(height: 15)
+                
+                Text("MyFridge")
+                    .font(.system(size: 42, weight: .bold, design: .rounded))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [.blue, .blue.opacity(0.7)],
+                            startPoint: .leading,
+                            endPoint: .trailing
                         )
-                        .padding(.bottom, 8)
-                        .opacity(isAnimating ? 1 : 0)
-                        .offset(y: isAnimating ? 0 : -20)
-                    
-                    Button(action: { showingItemsList = true }) {
-                        ZStack {
-                            Circle()
-                                .fill(
-                                    RadialGradient(
-                                        colors: [.blue.opacity(0.2), .clear],
-                                        center: .center,
-                                        startRadius: 80,
-                                        endRadius: 140
-                                    )
+                    )
+                    .padding(.bottom, 8)
+                    .opacity(isAnimating ? 1 : 0)
+                    .offset(y: isAnimating ? 0 : -20)
+                
+                Button(action: { showingItemsList = true }) {
+                    ZStack {
+                        Circle()
+                            .fill(
+                                RadialGradient(
+                                    colors: [.blue.opacity(0.2), .clear],
+                                    center: .center,
+                                    startRadius: 80,
+                                    endRadius: 130
                                 )
-                                .frame(width: 280, height: 280)
-                            
-                            Image(systemName: "refrigerator.fill")
-                                .font(.system(size: 150))
-                                .foregroundStyle(
-                                    LinearGradient(
-                                        colors: [.blue, .blue.opacity(0.6)],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
+                            )
+                            .frame(width: 260, height: 260)
+                        
+                        Image(systemName: "refrigerator.fill")
+                            .font(.system(size: 140))
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [.blue, .blue.opacity(0.6)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
                                 )
-                                .shadow(color: .blue.opacity(0.4), radius: 15, x: -5, y: 10)
-                                .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 15)
-                            
-                            if totalItems > 0 {
-                                Text("\(totalItems)")
-                                    .font(.system(size: 40, weight: .bold, design: .rounded))
-                                    .foregroundStyle(.white)
-                                    .frame(width: 80, height: 80)
-                                    .background(
-                                        Circle()
-                                            .fill(.blue)
-                                            .shadow(color: .blue.opacity(0.5), radius: 10, y: 5)
-                                    )
-                                    .offset(x: 50, y: -50)
-                            }
+                            )
+                            .shadow(color: .blue.opacity(0.4), radius: 15, x: -5, y: 10)
+                            .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 15)
+                        
+                        if totalItems > 0 {
+                            Text("\(totalItems)")
+                                .font(.system(size: 36, weight: .bold, design: .rounded))
+                                .foregroundStyle(.white)
+                                .frame(width: 70, height: 70)
+                                .background(
+                                    Circle()
+                                        .fill(.blue)
+                                        .shadow(color: .blue.opacity(0.5), radius: 10, y: 5)
+                                )
+                                .offset(x: 45, y: -45)
                         }
-                        .scaleEffect(isAnimating ? 1 : 0.8)
+                    }
+                    .scaleEffect(isAnimating ? 1 : 0.8)
+                }
+                .buttonStyle(.plain)
+                
+                Text("Track your groceries, reduce waste")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.secondary)
+                    .padding(.top, 12)
+                    .opacity(isAnimating ? 1 : 0)
+                
+                Spacer()
+                
+                VStack(spacing: 12) {
+                    Text("Quick Actions")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 4)
+                        .opacity(isAnimating ? 1 : 0)
+                    
+                    Button(action: { showingAddItem = true }) {
+                        HStack(spacing: 16) {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(.green.opacity(0.1))
+                                    .frame(width: 46, height: 46)
+                                
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.system(size: 20, weight: .semibold))
+                                    .foregroundStyle(.green)
+                            }
+                            
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Add Manually")
+                                    .font(.system(size: 17, weight: .semibold))
+                                    .foregroundStyle(.primary)
+                                
+                                Text("Quick entry for single items")
+                                    .font(.system(size: 13))
+                                    .foregroundStyle(.secondary)
+                            }
+                            
+                            Spacer()
+                        }
+                        .padding(16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color(.systemBackground))
+                                .shadow(color: .black.opacity(0.05), radius: 8, y: 2)
+                        )
                     }
                     .buttonStyle(.plain)
-                    
-                    Text("Track your groceries, reduce waste")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundStyle(.secondary)
-                        .padding(.top, 16)
-                        .opacity(isAnimating ? 1 : 0)
-                    
-                    Spacer()
-                        .frame(height: 60)
-                    
-                    VStack(spacing: 16) {
-                        Text("Quick Actions")
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundStyle(.secondary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal, 24)
-                            .padding(.bottom, 4)
-                            .opacity(isAnimating ? 1 : 0)
-                        
-                        Button(action: { showingAddItem = true }) {
-                            HStack(spacing: 16) {
-                                ZStack {
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .fill(.green.opacity(0.1))
-                                        .frame(width: 46, height: 46)
-                                    
-                                    Image(systemName: "plus.circle.fill")
-                                        .font(.system(size: 20, weight: .semibold))
-                                        .foregroundStyle(.green)
-                                }
-                                
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text("Add Manually")
-                                        .font(.system(size: 17, weight: .semibold))
-                                        .foregroundStyle(.primary)
-                                    
-                                    Text("Quick entry for single items")
-                                        .font(.system(size: 13))
-                                        .foregroundStyle(.secondary)
-                                }
-                                
-                                Spacer()
-                            }
-                            .padding(16)
-                            .background(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .fill(Color(.systemBackground))
-                                    .shadow(color: .black.opacity(0.05), radius: 8, y: 2)
-                            )
-                        }
-                        .buttonStyle(.plain)
-                        .padding(.horizontal, 24)
-                        .opacity(isAnimating ? 1 : 0)
-                        .offset(x: isAnimating ? 0 : -20)
-                    }
-                    .padding(.bottom, 40)
-                    
-                    Spacer()
-                        .frame(height: 20)
-                    
-                    Button(action: scanNow) {
-                        HStack(spacing: 14) {
-                            Image(systemName: "barcode.viewfinder")
-                                .font(.system(size: 30, weight: .semibold))
-                            
-                            Text("Scan Receipt")
-                                .font(.system(size: 24, weight: .bold))
-                        }
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 100)
-                        .background(
-                            RoundedRectangle(cornerRadius: 18)
-                                .fill(
-                                    LinearGradient(
-                                        colors: [.blue, .blue.opacity(0.85)],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                )
-                                .shadow(color: .blue.opacity(0.5), radius: 15, y: 8)
-                        )
-                    }
-                    .buttonStyle(ScaleButtonStyle())
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 50)
+                    .padding(.horizontal, 24)
                     .opacity(isAnimating ? 1 : 0)
-                    .offset(y: isAnimating ? 0 : 20)
+                    .offset(x: isAnimating ? 0 : -20)
+                    
+                    // Cookbook Button (Coming Soon - Premium Feature)
+                    Button(action: {}) {
+                        HStack(spacing: 16) {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color(.systemGray5))
+                                    .frame(width: 46, height: 46)
+                                
+                                Image(systemName: "book.fill")
+                                    .font(.system(size: 20, weight: .semibold))
+                                    .foregroundStyle(.gray)
+                            }
+                            
+                            VStack(alignment: .leading, spacing: 2) {
+                                HStack(spacing: 6) {
+                                    Text("Cookbook")
+                                        .font(.system(size: 17, weight: .semibold))
+                                        .foregroundStyle(.secondary)
+                                    
+                                    // Premium badge
+                                    Text("PREMIUM")
+                                        .font(.system(size: 9, weight: .bold))
+                                        .foregroundStyle(.white)
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 2)
+                                        .background(
+                                            Capsule()
+                                                .fill(Color.orange.opacity(0.7))
+                                        )
+                                }
+                                
+                                Text("Coming soon")
+                                    .font(.system(size: 13))
+                                    .foregroundStyle(.secondary)
+                            }
+                            
+                            Spacer()
+                        }
+                        .padding(16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color(.systemBackground))
+                                .shadow(color: .black.opacity(0.05), radius: 8, y: 2)
+                        )
+                        .opacity(0.85)
+                    }
+                    .disabled(true)
+                    .buttonStyle(.plain)
+                    .padding(.horizontal, 24)
+                    .opacity(isAnimating ? 1 : 0)
+                    .offset(x: isAnimating ? 0 : -20)
                 }
+                .padding(.bottom, 16)
+                
+                Button(action: scanNow) {
+                    HStack(spacing: 14) {
+                        Image(systemName: "barcode.viewfinder")
+                            .font(.system(size: 26, weight: .semibold))
+                        
+                        Text("Scan Receipt")
+                            .font(.system(size: 22, weight: .bold))
+                    }
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 85)
+                    .background(
+                        RoundedRectangle(cornerRadius: 18)
+                            .fill(
+                                LinearGradient(
+                                    colors: [.blue, .blue.opacity(0.85)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .shadow(color: .blue.opacity(0.5), radius: 15, y: 8)
+                    )
+                }
+                .buttonStyle(ScaleButtonStyle())
+                .padding(.horizontal, 16)
+                .padding(.bottom, 35)
+                .opacity(isAnimating ? 1 : 0)
+                .offset(y: isAnimating ? 0 : 20)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color(.systemGroupedBackground))
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -274,26 +321,68 @@ struct ItemsListView: View {
     @Query(sort: \Item.expirationDate) private var items: [Item]
     @State private var selectedItem: Item?
     @State private var showingEditItem = false
+    @State private var expandedCategories: Set<ItemCategory> = []
+    
+    // Group items by category
+    private var groupedItems: [ItemCategory: [Item]] {
+        Dictionary(grouping: items) { item in
+            item.itemCategory
+        }
+    }
+    
+    // Get categories that have items, sorted in a logical order
+    private var categoriesWithItems: [ItemCategory] {
+        ItemCategory.allCases.filter { category in
+            groupedItems[category]?.isEmpty == false
+        }
+    }
 
     var body: some View {
         NavigationStack {
             List {
-                ForEach(items) { item in
-                    ItemRowView(item: item)
-                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                        .listRowSeparator(.hidden)
-                        .listRowBackground(Color.clear)
-                        .transition(.asymmetric(
-                            insertion: .scale.combined(with: .opacity),
-                            removal: .opacity
-                        ))
-                        .onTapGesture {
-                            selectedItem = item
-                            showingEditItem = true
+                ForEach(categoriesWithItems, id: \.self) { category in
+                    Section {
+                        if expandedCategories.contains(category) {
+                            ForEach(groupedItems[category] ?? []) { item in
+                                ItemRowView(item: item)
+                                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                                    .listRowSeparator(.hidden)
+                                    .listRowBackground(Color.clear)
+                                    .transition(.asymmetric(
+                                        insertion: .scale.combined(with: .opacity),
+                                        removal: .opacity
+                                    ))
+                                    .onTapGesture {
+                                        selectedItem = item
+                                        showingEditItem = true
+                                    }
+                            }
+                            .onDelete { offsets in
+                                deleteItems(in: category, at: offsets)
+                            }
                         }
+                    } header: {
+                        CategoryHeaderView(
+                            category: category,
+                            itemCount: groupedItems[category]?.count ?? 0,
+                            isExpanded: expandedCategories.contains(category)
+                        )
+                        .listRowBackground(Color.clear)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                if expandedCategories.contains(category) {
+                                    expandedCategories.remove(category)
+                                } else {
+                                    expandedCategories.insert(category)
+                                }
+                            }
+                        }
+                    }
+                    .listSectionSeparator(.hidden)
                 }
-                .onDelete(perform: deleteItems)
             }
+            .animation(.easeInOut(duration: 0.3), value: expandedCategories)
             .animation(.easeInOut(duration: 0.3), value: items.count)
             .listStyle(.plain)
             .background(Color(.systemGroupedBackground))
@@ -325,10 +414,11 @@ struct ItemsListView: View {
         }
     }
 
-    private func deleteItems(offsets: IndexSet) {
+    private func deleteItems(in category: ItemCategory, at offsets: IndexSet) {
         withAnimation {
+            let categoryItems = groupedItems[category] ?? []
             for index in offsets {
-                let item = items[index]
+                let item = categoryItems[index]
                 // Cancel notification before deleting
                 Task {
                     await notificationManager.cancelNotification(for: item)
@@ -336,6 +426,51 @@ struct ItemsListView: View {
                 modelContext.delete(item)
             }
         }
+    }
+}
+
+// MARK: - Category Header View
+struct CategoryHeaderView: View {
+    let category: ItemCategory
+    let itemCount: Int
+    let isExpanded: Bool
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            // Category emoji
+            Text(category.emoji)
+                .font(.system(size: 28))
+            
+            // Category name
+            Text(category.rawValue)
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(.primary)
+            
+            Spacer()
+            
+            // Item count
+            Text("\(itemCount) \(itemCount == 1 ? "item" : "items")")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                .background(
+                    Capsule()
+                        .fill(Color(.systemGray5))
+                )
+            
+            // Chevron indicator
+            Image(systemName: "chevron.right")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(.secondary)
+                .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                .animation(.spring(response: 0.3, dampingFraction: 0.8), value: isExpanded)
+        }
+        .padding(.vertical, 12)
+        .padding(.horizontal, 16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.systemBackground))
+        .listRowInsets(EdgeInsets())
     }
 }
 
