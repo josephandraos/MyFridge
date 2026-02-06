@@ -2,7 +2,7 @@
 //  ReceiptOCREngine.swift
 //  MyFridge
 //
-//  Enhanced OCR engine with Google ML Kit support and Vision fallback
+//  Enhanced OCR engine with region-based filtering and Vision support
 //
 
 import UIKit
@@ -32,17 +32,22 @@ struct ReceiptOCREngine {
     
     /// Extract text from image using best available OCR engine
     static func extractText(from image: UIImage) async -> String {
+        return await extractTextWithVision(image, filterRegion: nil)
+    }
+    
+    /// Extract text only from a specific region of the image (inside detected rectangle)
+    static func extractText(from image: UIImage, region: VNRectangleObservation?) async -> String {
         
-        // Try Google ML Kit first (if available)
-        // Uncomment these lines after installing ML Kit
-        /*
-        if let mlKitText = await extractTextWithMLKit(image) {
-            return mlKitText
+        // If we have a detected rectangle, crop and preprocess first
+        if let region = region {
+            // Use ImagePreprocessor to crop and enhance the image
+            let croppedImage = await ImagePreprocessor.preprocessReceipt(image, rectangle: region)
+            // Now scan the cropped image (no need to filter again since it's already cropped)
+            return await extractText(from: croppedImage)
         }
-        */
         
-        // Fallback to enhanced Apple Vision
-        return await extractTextWithVision(image)
+        // No region detected - scan entire image
+        return await extractText(from: image)
     }
     
     // MARK: - Google ML Kit OCR (Best Quality)
@@ -78,7 +83,7 @@ struct ReceiptOCREngine {
                 
                 for block in result.blocks {
                     // Only include high-confidence text
-                    if block.confidence >= 0.7 {
+                    if block.confidence >= 0.75 {
                         extractedText += block.text + "\n"
                     }
                 }
@@ -92,8 +97,8 @@ struct ReceiptOCREngine {
     
     // MARK: - Apple Vision OCR (Good Quality, Built-in)
     
-    /// Extract text using Apple's Vision framework with optimal settings
-    private static func extractTextWithVision(_ image: UIImage) async -> String {
+    /// Extract text using Apple's Vision framework with optimal settings and optional region filtering
+    private static func extractTextWithVision(_ image: UIImage, filterRegion: VNRectangleObservation? = nil) async -> String {
         
         return await withCheckedContinuation { continuation in
             
@@ -115,15 +120,21 @@ struct ReceiptOCREngine {
                     return
                 }
                 
-                // Extract text with confidence filtering
                 var extractedText = ""
                 
                 for observation in observations {
-                    // Get top candidate
+                    // Filter by region if provided (for non-cropped images)
+                    if let region = filterRegion {
+                        // Check if text is inside the receipt rectangle
+                        if !isTextInsideRectangle(observation.boundingBox, rectangle: region) {
+                            continue // Skip text outside receipt
+                        }
+                    }
+                    
                     guard let topCandidate = observation.topCandidates(1).first else { continue }
                     
-                    // Only include text with good confidence
-                    if topCandidate.confidence >= 0.6 {
+                    // Only include text with good confidence (increased from 0.6 to 0.75)
+                    if topCandidate.confidence >= 0.75 {
                         extractedText += topCandidate.string + "\n"
                     }
                 }
@@ -135,7 +146,7 @@ struct ReceiptOCREngine {
             request.recognitionLevel = .accurate // Slower but much better
             request.usesLanguageCorrection = true
             request.recognitionLanguages = ["en-US", "fr-CA"] // English + French
-            request.minimumTextHeight = 0.01 // Ignore tiny text (likely noise)
+            request.minimumTextHeight = 0.03 // Increased from 0.01 - ignore tiny text (likely noise)
             request.revision = VNRecognizeTextRequestRevision3 // Use latest revision
             
             // Perform request
@@ -148,6 +159,30 @@ struct ReceiptOCREngine {
                 continuation.resume(returning: "")
             }
         }
+    }
+    
+    /// Check if text bounding box is inside receipt rectangle
+    private static func isTextInsideRectangle(_ textBox: CGRect, rectangle: VNRectangleObservation) -> Bool {
+        
+        // Get receipt bounds from corner points
+        let minX = min(rectangle.topLeft.x, rectangle.bottomLeft.x)
+        let maxX = max(rectangle.topRight.x, rectangle.bottomRight.x)
+        let minY = min(rectangle.bottomLeft.y, rectangle.bottomRight.y)
+        let maxY = max(rectangle.topLeft.y, rectangle.topRight.y)
+        
+        // Add small padding to be more lenient (5% on each side)
+        let padding: CGFloat = 0.05
+        let receiptRect = CGRect(
+            x: max(0, minX - padding),
+            y: max(0, minY - padding),
+            width: min(1, maxX + padding) - max(0, minX - padding),
+            height: min(1, maxY + padding) - max(0, minY - padding)
+        )
+        
+        // Check if text center is inside receipt (more lenient than requiring full containment)
+        let textCenter = CGPoint(x: textBox.midX, y: textBox.midY)
+        
+        return receiptRect.contains(textCenter)
     }
     
     // MARK: - Two-Pass OCR (Optional optimization)

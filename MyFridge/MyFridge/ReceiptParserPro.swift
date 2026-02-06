@@ -47,7 +47,7 @@ struct ReceiptParserPro {
             // Try to extract item
             if let item = extractItem(from: cleanLine) {
                 items.append(item)
-                print("✅ Found: \(item.name) (qty: \(item.quantity))")
+                print("✅ Found: \(item.name) (qty: \(item.quantity)) - Category: \(item.estimatedCategory.rawValue)")
             }
         }
         
@@ -71,17 +71,19 @@ struct ReceiptParserPro {
         let headerKeywords = [
             "store", "magasin", "location", "address", "adresse",
             "phone", "tel", "telephone", "www", ".com", "welcome",
-            "bienvenue", "thank", "merci", "cashier", "caisse"
+            "bienvenue", "thank", "merci", "cashier", "caisse", "costco",
+            "libre-service", "self-service", "membre", "member"
         ]
         
         let footerKeywords = [
-            "total", "subtotal", "tax", "tps", "tvq", "gst", "hst",
-            "balance", "payment", "paid", "card", "credit", "debit",
-            "visa", "mastercard", "change", "monnaie", "thank", "merci"
+            "total", "subtotal", "sous-total", "tax", "tps", "tvq", "gst", "hst",
+            "balance", "payment", "paid", "payé", "card", "credit", "debit",
+            "visa", "mastercard", "change", "monnaie", "thank", "merci",
+            "interac", "compte", "solde"
         ]
         
-        // Check first 5 lines for header
-        for i in 0..<min(5, lines.count) {
+        // Check first 8 lines for header
+        for i in 0..<min(8, lines.count) {
             let line = lines[i].lowercased()
             if headerKeywords.contains(where: { line.contains($0) }) {
                 headerCount = i + 1
@@ -90,8 +92,8 @@ struct ReceiptParserPro {
             }
         }
         
-        // Check last 10 lines for footer
-        for i in (max(0, lines.count - 10)..<lines.count).reversed() {
+        // Check last 15 lines for footer (receipts have lots of payment info at bottom)
+        for i in (max(0, lines.count - 15)..<lines.count).reversed() {
             let line = lines[i].lowercased()
             if footerKeywords.contains(where: { line.contains($0) }) {
                 footerCount = lines.count - i
@@ -123,8 +125,7 @@ struct ReceiptParserPro {
             score += 2.0
         }
         
-        // Contains food-like words from your existing ReceiptParser
-        // This uses your Canadian brand database
+        // Contains food-like words (enhanced with French and Canadian brands)
         let normalizedLine = normalizeLine(line)
         if containsFoodKeywords(normalizedLine) {
             score += 5.0
@@ -141,9 +142,11 @@ struct ReceiptParserPro {
         }
         
         // Context bonus: lines above/below are also likely items
-        if index > 0 {
-            let prevScore = scoreLine(context[index - 1], context: context, index: index - 1)
-            if prevScore >= minLineScore {
+        if index > 0 && index < context.count - 1 {
+            let prevLine = context[index - 1]
+            let nextLine = context[index + 1]
+            
+            if containsPrice(prevLine) || containsPrice(nextLine) {
                 score += 1.0
             }
         }
@@ -157,7 +160,7 @@ struct ReceiptParserPro {
             score -= 6.0
         }
         
-        // Skip keywords (STRONG negative)
+        // Skip keywords (STRONG negative) - ENHANCED WITH PAYMENT TERMS
         let skipKeywords = [
             "total", "subtotal", "sous-total", "tax", "tps", "tvq", "gst", "hst",
             "balance", "payment", "paid", "payé", "card", "carte", "credit", "debit",
@@ -166,7 +169,11 @@ struct ReceiptParserPro {
             "receipt", "reçu", "invoice", "facture", "date", "time", "heure",
             "customer", "client", "phone", "telephone", "address", "adresse",
             "save", "econom", "coupon", "rabais", "discount", "promo",
-            "member", "membre", "points", "rewards", "récompense"
+            "member", "membre", "points", "rewards", "récompense",
+            // Payment/transaction info (NEW - filters out Interac, references, etc.)
+            "interac", "compte:", "reference:", "autor", "authorization",
+            "transaction", "achat", "vente", "solde", "approve", "approuvé",
+            "numero", "number", "ref:", "auth:", "paiement"
         ]
         
         for keyword in skipKeywords {
@@ -174,6 +181,11 @@ struct ReceiptParserPro {
                 score -= 15.0 // Heavy penalty
                 break
             }
+        }
+        
+        // Lines starting with # or special characters (likely IDs)
+        if line.starts(with: "#") || line.starts(with: "*") || line.starts(with: "-") {
+            score -= 10.0
         }
         
         // All caps with many spaces (likely header/separator)
@@ -220,8 +232,8 @@ struct ReceiptParserPro {
             return nil
         }
         
-        // Try to match using your existing ReceiptParser
-        let category = ReceiptParser.inferCategory(from: cleanedLine)
+        // Infer category using BOTH ReceiptParser AND enhanced logic
+        let category = inferCategoryEnhanced(from: cleanedLine)
         
         return ParsedItem(
             name: cleanedLine.capitalized,
@@ -231,6 +243,113 @@ struct ReceiptParserPro {
         )
     }
     
+    // MARK: - Enhanced Category Inference (Bilingual)
+    
+    private static func inferCategoryEnhanced(from itemName: String) -> ItemCategory {
+        let normalized = itemName.lowercased().folding(options: .diacriticInsensitive, locale: .current)
+        
+        // DAIRY & EGGS (French + English)
+        if normalized.contains("lait") || normalized.contains("milk") ||
+           normalized.contains("beurre") || normalized.contains("butter") ||
+           normalized.contains("fromage") || normalized.contains("cheese") ||
+           normalized.contains("mozzarella") || normalized.contains("mozzafina") ||
+           normalized.contains("cheddar") || normalized.contains("brie") ||
+           normalized.contains("yogurt") || normalized.contains("yoghourt") ||
+           normalized.contains("creme") || normalized.contains("cream") ||
+           normalized.contains("oeuf") || normalized.contains("egg") {
+            return .dairy
+        }
+        
+        // MEAT & FISH (French + English)
+        if normalized.contains("poulet") || normalized.contains("chicken") ||
+           normalized.contains("boeuf") || normalized.contains("beef") ||
+           normalized.contains("porc") || normalized.contains("pork") ||
+           normalized.contains("bacon") || normalized.contains("saucisse") ||
+           normalized.contains("sausage") || normalized.contains("steak") ||
+           normalized.contains("viande") || normalized.contains("meat") ||
+           normalized.contains("poisson") || normalized.contains("fish") ||
+           normalized.contains("saumon") || normalized.contains("salmon") ||
+           normalized.contains("thon") || normalized.contains("tuna") {
+            return .meat
+        }
+        
+        // FRUITS (French + English)
+        if normalized.contains("pomme") || normalized.contains("apple") ||
+           normalized.contains("banane") || normalized.contains("banana") ||
+           normalized.contains("orange") || normalized.contains("citron") ||
+           normalized.contains("lemon") || normalized.contains("raisin") ||
+           normalized.contains("grape") || normalized.contains("fraise") ||
+           normalized.contains("strawberr") || normalized.contains("melon") ||
+           normalized.contains("peche") || normalized.contains("peach") ||
+           normalized.contains("poire") || normalized.contains("pear") ||
+           normalized.contains("cerise") || normalized.contains("cherr") {
+            return .fruits
+        }
+        
+        // VEGETABLES (French + English)
+        if normalized.contains("carotte") || normalized.contains("carrot") ||
+           normalized.contains("patate") || normalized.contains("potato") ||
+           normalized.contains("pomme de terre") ||
+           normalized.contains("tomate") || normalized.contains("tomato") ||
+           normalized.contains("laitue") || normalized.contains("lettuce") ||
+           normalized.contains("salade") || normalized.contains("salad") ||
+           normalized.contains("oignon") || normalized.contains("onion") ||
+           normalized.contains("concombre") || normalized.contains("cucumber") ||
+           normalized.contains("brocoli") || normalized.contains("broccoli") ||
+           normalized.contains("chou") || normalized.contains("cabbage") ||
+           normalized.contains("celeri") || normalized.contains("celery") ||
+           normalized.contains("poivron") || normalized.contains("pepper") {
+            return .vegetables
+        }
+        
+        // BREAD & BAKERY (French + English)
+        if normalized.contains("pain") || normalized.contains("bread") ||
+           normalized.contains("baguette") || normalized.contains("croissant") ||
+           normalized.contains("gateau") || normalized.contains("cake") ||
+           normalized.contains("muffin") || normalized.contains("bagel") ||
+           normalized.contains("brioche") || normalized.contains("patisserie") {
+            return .bakery
+        }
+        
+        // BEVERAGES (French + English + Canadian brands)
+        if normalized.contains("eau") || normalized.contains("water") ||
+           normalized.contains("eska") || // Quebec water brand
+           normalized.contains("pepsi") || normalized.contains("coca") ||
+           normalized.contains("coke") || normalized.contains("soda") ||
+           normalized.contains("jus") || normalized.contains("juice") ||
+           normalized.contains("cafe") || normalized.contains("coffee") ||
+           normalized.contains("the") || normalized.contains("tea") ||
+           normalized.contains("lait") || normalized.contains("milk") ||
+           normalized.contains("biere") || normalized.contains("beer") ||
+           normalized.contains("vin") || normalized.contains("wine") ||
+           normalized.contains("boisson") || normalized.contains("drink") ||
+           normalized.contains("diete") || normalized.contains("diet") {
+            return .beverages
+        }
+        
+        // PREPARED FOODS (French + English)
+        if normalized.contains("pizza") || normalized.contains("burger") ||
+           normalized.contains("sandwich") || normalized.contains("pates") ||
+           normalized.contains("pasta") || normalized.contains("spaghetti") ||
+           normalized.contains("lasagne") || normalized.contains("lasagna") ||
+           normalized.contains("soupe") || normalized.contains("soup") ||
+           normalized.contains("plat") || normalized.contains("meal") ||
+           normalized.contains("pret") || normalized.contains("ready") {
+            return .prepared
+        }
+        
+        // FROZEN (French + English)
+        if normalized.contains("congele") || normalized.contains("frozen") ||
+           normalized.contains("surgele") || normalized.contains("glace") ||
+           normalized.contains("ice cream") || normalized.contains("sorbet") {
+            return .frozen
+        }
+        
+        // SNACKS & CONDIMENTS (default category)
+        // Includes: chips, crackers, cookies, sauces, spices, condiments, etc.
+        return .snacks
+    }
+    
     // MARK: - Helper Functions
     
     private static func normalizeLine(_ line: String) -> String {
@@ -238,13 +357,21 @@ struct ReceiptParserPro {
     }
     
     private static func containsFoodKeywords(_ normalizedLine: String) -> Bool {
-        // Common food keywords
+        // Enhanced food keywords with French + Canadian brands
         let foodKeywords = [
-            "milk", "lait", "cheese", "fromage", "bread", "pain",
+            // Dairy & Eggs (French + English)
+            "milk", "lait", "cheese", "fromage", "mozzarella", "mozzafina",
+            "cheddar", "brie", "bread", "pain", "butter", "beurre",
             "chicken", "poulet", "beef", "boeuf", "egg", "oeuf",
-            "butter", "beurre", "yogurt", "apple", "pomme",
-            "banana", "orange", "carrot", "tomato", "potato",
-            "rice", "pasta", "cereal", "juice", "water"
+            "yogurt", "yoghourt", "apple", "pomme", "banana", "banane",
+            "orange", "carrot", "carotte", "tomato", "tomate",
+            "potato", "patate", "rice", "riz", "pasta", "pates",
+            "cereal", "cereale", "juice", "jus", "water", "eau",
+            // Quebec/Canadian brands
+            "eska", "agropur", "natrel", "lactantia",
+            // Common French grocery terms
+            "salade", "viande", "poisson", "legume", "fruit",
+            "boisson", "sauce", "epice", "condiment"
         ]
         
         for keyword in foodKeywords {
@@ -257,8 +384,8 @@ struct ReceiptParserPro {
     }
     
     private static func hasItemCode(_ line: String) -> Bool {
-        // Match 7-8 digit codes at start
-        let pattern = #"^\d{7,8}\s+"#
+        // Match 5-8 digit codes at start
+        let pattern = #"^\d{5,8}\s+"#
         return line.range(of: pattern, options: .regularExpression) != nil
     }
     
@@ -268,11 +395,13 @@ struct ReceiptParserPro {
     }
     
     private static func removeTrailingPrice(_ line: String) -> String {
-        // Remove price patterns at end: $12.99, 12.99$, 12,99, etc.
+        // Remove price patterns at end: $12.99, 12.99$, 12,99, FP, etc.
         let patterns = [
-            #"\s*\$?\d+[.,]\d{2}\s*\$?\s*$"#,
-            #"\s*\d+[.,]\d{2}\s*(CAD|USD)?\s*$"#,
-            #"\s*\d+\s\d{2}\s*$"#
+            #"\s*\$?\d+[.,]\d{2}\s*\$?\s*(FP|F)?\s*$"#,
+            #"\s*\d+[.,]\d{2}\s*(CAD|USD|FP|F)?\s*$"#,
+            #"\s*\d+\s\d{2}\s*(FP|F)?\s*$"#,
+            #"\s*-\s*\d+[.,]\d{2}\s*$"#,
+            #"\s*~\s*\d+[.,]\d{2}\s*$"#
         ]
         
         var result = line
@@ -280,7 +409,7 @@ struct ReceiptParserPro {
             result = result.replacingOccurrences(of: pattern, with: "", options: .regularExpression)
         }
         
-        return result
+        return result.trimmingCharacters(in: .whitespaces)
     }
     
     private static func removeQuantityIndicators(_ line: String) -> String {
@@ -289,7 +418,8 @@ struct ReceiptParserPro {
             #"\d+\.?\d*\s*[xX]\s*"#,
             #"\s*[xX]\s*\d+\.?\d*"#,
             #"\bQTY\s*:?\s*\d+\.?\d*"#,
-            #"\d+\.?\d*\s*(EA|DZ|DOZ|L|KG|LB|G)\b"#
+            #"\d+\.?\d*\s*(EA|DZ|DOZ|L|KG|LB|G)\b"#,
+            #"\s*-\s*$"#  // Remove trailing dashes
         ]
         
         var result = line
@@ -297,14 +427,14 @@ struct ReceiptParserPro {
             result = result.replacingOccurrences(of: pattern, with: " ", options: [.regularExpression, .caseInsensitive])
         }
         
-        return result.replacingOccurrences(of: "  ", with: " ")
+        return result.replacingOccurrences(of: "  ", with: " ").trimmingCharacters(in: .whitespaces)
     }
     
     private static func containsPrice(_ text: String) -> Bool {
         let pricePatterns = [
             #"\$?\d+[.,]\d{2}"#,
             #"\d+[.,]\d{2}\s*\$"#,
-            #"\d+\s\d{2}\b"#
+            #"\d+\s\d{2}\s*(FP|F)?\b"#
         ]
         
         for pattern in pricePatterns {
@@ -413,6 +543,11 @@ struct ReceiptParserPro {
             // Name shouldn't be too generic
             let genericNames = ["item", "product", "article", "produit"]
             if genericNames.contains(item.name.lowercased()) {
+                return false
+            }
+            
+            // Filter out lines that start with special characters
+            if item.name.starts(with: "#") || item.name.starts(with: "*") {
                 return false
             }
             
