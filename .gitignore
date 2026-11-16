@@ -1,0 +1,29 @@
+# macOS
+.DS_Store
+
+# Xcode
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+build/
+DerivedData/
+
+# Swift Package Manager
+.build/
+
+# CocoaPods / Carthage
+Pods/
+Carthage/Build/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Office temp/lock files
+~$*
+
+# Misc
+*.swp
+*.tmp

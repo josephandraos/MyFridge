@@ -390,7 +390,7 @@ struct SettingsView: View {
     
     private var aboutSection: some View {
         Section {
-            Link(destination: URL(string: "https://www.apple.com/ios/ios-privacy/")!) {
+            Link(destination: AppLinks.privacyPolicy) {
                 HStack {
                     Image(systemName: "hand.raised.fill")
                         .font(.system(size: 20))
@@ -409,7 +409,7 @@ struct SettingsView: View {
                 }
             }
             
-            Link(destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!) {
+            Link(destination: AppLinks.termsOfUse) {
                 HStack {
                     Image(systemName: "doc.text.fill")
                         .font(.system(size: 20))
@@ -428,20 +428,23 @@ struct SettingsView: View {
                 }
             }
             
-            HStack {
-                Image(systemName: "envelope.fill")
-                    .font(.system(size: 20))
-                    .foregroundStyle(.blue)
-                    .frame(width: 28)
-                
-                Text("Contact Support")
-                    .font(.system(size: 17))
-                
-                Spacer()
-                
-                Text("support@myfridge.app")
-                    .font(.system(size: 14))
-                    .foregroundStyle(.secondary)
+            Link(destination: AppLinks.supportMailURL) {
+                HStack {
+                    Image(systemName: "envelope.fill")
+                        .font(.system(size: 20))
+                        .foregroundStyle(.blue)
+                        .frame(width: 28)
+
+                    Text("Contact Support")
+                        .font(.system(size: 17))
+                        .foregroundStyle(.primary)
+
+                    Spacer()
+
+                    Text(AppLinks.supportEmail)
+                        .font(.system(size: 14))
+                        .foregroundStyle(.secondary)
+                }
             }
         } header: {
             Text("About")

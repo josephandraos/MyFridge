@@ -11,6 +11,7 @@ import VisionKit
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.scenePhase) private var scenePhase
     @EnvironmentObject var notificationManager: NotificationManager
     @Query private var items: [Item]
     @State private var showingAddItem = false
@@ -246,6 +247,16 @@ struct ContentView: View {
                 withAnimation(.easeOut(duration: 0.6)) {
                     isAnimating = true
                 }
+                WidgetDataUpdater.syncWithWidget(modelContext: modelContext)
+            }
+            // Keep the home-screen widget in sync (also applies items checked off in the widget)
+            .onChange(of: scenePhase) { _, newPhase in
+                if newPhase == .active || newPhase == .background {
+                    WidgetDataUpdater.syncWithWidget(modelContext: modelContext)
+                }
+            }
+            .onChange(of: items.count) { _, _ in
+                WidgetDataUpdater.syncWithWidget(modelContext: modelContext)
             }
             .sheet(isPresented: $showingAddItem) {
                 AddItemView(showNotificationPermissionAlert: $showNotificationPermissionAlert)

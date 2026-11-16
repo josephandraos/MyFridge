@@ -160,7 +160,7 @@ struct ProfileView: View {
                                                 title: "Yearly",
                                                 price: yearly.displayPrice,
                                                 period: "/year",
-                                                badge: "Save $6"
+                                                badge: "Save 16%"
                                             ) {
                                                 selectedProduct = yearly
                                             }

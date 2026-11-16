@@ -71,6 +71,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+				MyFridgeWidget.entitlements,
 			);
 			target = 85661D682F33DD20008BF7D8 /* MyFridgeWidgetExtension */;
 		};
@@ -537,7 +538,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MyFridge/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
-				INFOPLIST_KEY_NSCameraUsageDescription = "";
+				INFOPLIST_KEY_NSCameraUsageDescription = "MyFridge uses the camera to scan your grocery receipts and add items to your fridge.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "MyFridge needs to save scanned receipts";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -575,7 +576,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MyFridge/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
-				INFOPLIST_KEY_NSCameraUsageDescription = "";
+				INFOPLIST_KEY_NSCameraUsageDescription = "MyFridge uses the camera to scan your grocery receipts and add items to your fridge.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "MyFridge needs to save scanned receipts";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -672,6 +673,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = MyFridgeWidget/MyFridgeWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = RV997F4M6J;
@@ -703,6 +705,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = MyFridgeWidget/MyFridgeWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = RV997F4M6J;

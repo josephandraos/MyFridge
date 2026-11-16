@@ -11,11 +11,14 @@ class SharedDataManager {
     
     static let shared = SharedDataManager()
     
-    private let appGroupID = "group.com.yourname.MyFridge"
+    /// Must match the App Group enabled on BOTH the app and widget targets
+    /// (see MyFridge.entitlements and MyFridgeWidget.entitlements).
+    static let appGroupID = "group.johnmorchaw.MyFridge"
     private let expiringItemsKey = "expiringItems"
+    private let pendingConsumedKey = "pendingConsumedItemIDs"
     
     private var userDefaults: UserDefaults? {
-        return UserDefaults(suiteName: appGroupID)
+        return UserDefaults(suiteName: Self.appGroupID)
     }
     
     // MARK: - Save Items for Widget
@@ -46,23 +49,36 @@ class SharedDataManager {
     
     // MARK: - Delete Item (from Widget)
     
-    /// Mark item as consumed (called from widget)
+    /// Mark item as consumed (called from the widget process).
+    /// Removes it from the widget's list right away and queues the ID so the
+    /// main app can delete it from SwiftData the next time it runs.
+    /// (A NotificationCenter post can't cross from the widget extension to the
+    /// app, so the queue lives in the shared App Group defaults instead.)
     func consumeItem(withID itemID: String) {
         var items = loadExpiringItems()
         items.removeAll { $0.id == itemID }
-        
+
         // Save updated list
         if let encoded = try? JSONEncoder().encode(items) {
             userDefaults?.set(encoded, forKey: expiringItemsKey)
-            print("✅ Consumed item \(itemID) from widget")
         }
-        
-        // Notify app to sync (app will delete from SwiftData)
-        NotificationCenter.default.post(
-            name: NSNotification.Name("ItemConsumedFromWidget"),
-            object: nil,
-            userInfo: ["itemID": itemID]
-        )
+
+        // Queue for the main app to delete from SwiftData
+        var pending = userDefaults?.stringArray(forKey: pendingConsumedKey) ?? []
+        if !pending.contains(itemID) {
+            pending.append(itemID)
+            userDefaults?.set(pending, forKey: pendingConsumedKey)
+        }
+        print("✅ Consumed item \(itemID) from widget (queued for app)")
+    }
+
+    /// Returns and clears the IDs consumed from the widget (called from the main app)
+    func takePendingConsumedIDs() -> [String] {
+        let pending = userDefaults?.stringArray(forKey: pendingConsumedKey) ?? []
+        if !pending.isEmpty {
+            userDefaults?.removeObject(forKey: pendingConsumedKey)
+        }
+        return pending
     }
 }
 
@@ -85,19 +101,19 @@ struct WidgetItem: Codable, Identifiable {
     }
     
     var emoji: String {
-        // Map categories to emojis
-        switch category.lowercased() {
-        case "dairy": return "🥛"
-        case "meat": return "🥩"
-        case "vegetables": return "🥬"
-        case "fruits": return "🍎"
-        case "beverages": return "🥤"
-        case "snacks": return "🍿"
-        case "bakery": return "🍞"
-        case "frozen": return "🧊"
-        case "prepared": return "🍱"
-        default: return "🍽️"
-        }
+        // Category strings are the app's ItemCategory raw values
+        // ("Dairy & Eggs", "Meat & Fish", ...), so match by keyword.
+        let c = category.lowercased()
+        if c.contains("dairy") { return "🥛" }
+        if c.contains("meat") { return "🥩" }
+        if c.contains("vegetable") { return "🥬" }
+        if c.contains("fruit") { return "🍎" }
+        if c.contains("drink") || c.contains("beverage") { return "🥤" }
+        if c.contains("snack") { return "🍿" }
+        if c.contains("bread") || c.contains("bakery") { return "🍞" }
+        if c.contains("frozen") { return "🧊" }
+        if c.contains("prepared") { return "🍱" }
+        return "🍽️"
     }
     
     var expirationText: String {

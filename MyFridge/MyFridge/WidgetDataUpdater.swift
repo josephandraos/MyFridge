@@ -68,6 +68,33 @@ class WidgetDataUpdater {
         }
     }
     
+    /// Full two-way sync with the widget. Call when the app becomes active, when it
+    /// goes to the background, and whenever the set of items changes.
+    ///  1. Deletes any items the user checked off ("consumed") from the widget
+    ///  2. Pushes the current expiring items back to the widget
+    @MainActor
+    static func syncWithWidget(modelContext: ModelContext) {
+        let consumedIDs = SharedDataManager.shared.takePendingConsumedIDs()
+
+        if !consumedIDs.isEmpty {
+            do {
+                let allItems = try modelContext.fetch(FetchDescriptor<Item>())
+                let consumedItems = allItems.filter { consumedIDs.contains($0.id.uuidString) }
+
+                NotificationManager.shared.cleanupNotifications(itemIds: consumedItems.map { $0.id })
+                for item in consumedItems {
+                    modelContext.delete(item)
+                }
+                try modelContext.save()
+                print("✅ Removed \(consumedItems.count) item(s) consumed from the widget")
+            } catch {
+                print("❌ Failed to apply widget consumption: \(error)")
+            }
+        }
+
+        refreshWidget(modelContext: modelContext)
+    }
+
     /// Handle item consumed from widget
     static func handleConsumedItem(itemID: String, modelContext: ModelContext) {
         // Find and delete the item from SwiftData

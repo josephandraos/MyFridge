@@ -2,7 +2,7 @@
 //  LoginView.swift
 //  MyFridge
 //
-//  Login screen with dark mode fix and temporary bypass
+//  Login screen (Sign in with Apple)
 //
 
 import SwiftUI
@@ -11,8 +11,7 @@ import AuthenticationServices
 struct LoginView: View {
     @EnvironmentObject var authManager: AuthenticationManager
     @State private var isAnimating = false
-    @State private var showBypassAlert = false
-    
+
     var body: some View {
         ZStack {
             // Adaptive background
@@ -97,15 +96,6 @@ struct LoginView: View {
                     Text("Secure sign-in with your Apple ID")
                         .font(.system(size: 13))
                         .foregroundColor(.secondary)
-                    
-                    // Temporary bypass button for testing
-                    Button(action: { showBypassAlert = true }) {
-                        Text("Continue Without Sign In")
-                            .font(.system(size: 15, weight: .medium))
-                            .foregroundColor(.blue)
-                            .underline()
-                    }
-                    .padding(.top, 8)
                 }
                 .padding(.bottom, 50)
                 .opacity(isAnimating ? 1 : 0)
@@ -126,22 +116,6 @@ struct LoginView: View {
                 Text(error)
             }
         }
-        .alert("Developer Mode", isPresented: $showBypassAlert) {
-            Button("Continue") {
-                bypassLogin()
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("This bypass is for testing while your Apple Developer account activates. Sign in with Apple will work once your account is active.")
-        }
-    }
-    
-    private func bypassLogin() {
-        // Temporary bypass - marks user as authenticated for testing
-        authManager.userID = "test-user-\(UUID().uuidString)"
-        authManager.userName = "Test User"
-        authManager.userEmail = "test@myfridge.app"
-        authManager.isAuthenticated = true
     }
 }
 

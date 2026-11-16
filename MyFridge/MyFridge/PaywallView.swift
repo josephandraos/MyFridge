@@ -65,7 +65,7 @@ struct PaywallView: View {
                 .font(.system(size: 34, weight: .bold))
                 .foregroundColor(.white)
             
-            Text("Unlock unlimited features")
+            Text("Scan as many receipts as you like")
                 .font(.system(size: 17))
                 .foregroundColor(.white.opacity(0.8))
         }
@@ -99,9 +99,6 @@ struct PaywallView: View {
     private var quickFeaturesSection: some View {
         VStack(spacing: 12) {
             QuickFeatureRow(icon: "infinity", title: "Unlimited Receipt Scans")
-            QuickFeatureRow(icon: "brain.head.profile", title: "AI Cookbook")
-            QuickFeatureRow(icon: "square.stack.3d.up.fill", title: "Unlimited Storage")
-            QuickFeatureRow(icon: "paintpalette.fill", title: "Custom Themes")
         }
         .padding(.horizontal, 24)
     }
@@ -125,7 +122,7 @@ struct PaywallView: View {
                 }
             }
             
-            Text("Tap any plan to see all premium features")
+            Text("Tap a plan to see details")
                 .font(.system(size: 14))
                 .foregroundColor(.white.opacity(0.6))
                 .padding(.top, 8)
@@ -211,7 +208,7 @@ struct PricingCard: View {
     
     private var savings: String? {
         if isYearly {
-            return "Save $6"
+            return "Save 16%"
         }
         return nil
     }

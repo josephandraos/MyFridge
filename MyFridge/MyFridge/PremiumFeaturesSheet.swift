@@ -24,7 +24,7 @@ struct PremiumFeaturesSheet: View {
     
     private var savings: String {
         if isYearly {
-            return "Save $6 per year"
+            return "Save 16% vs. monthly"
         }
         return ""
     }
@@ -132,34 +132,6 @@ struct PremiumFeaturesSheet: View {
                 title: "Unlimited Receipt Scans",
                 description: "Scan as many receipts as you want, no limits"
             )
-            
-            PremiumFeatureCard(
-                icon: "brain.head.profile",
-                iconColor: .purple,
-                title: "AI Cookbook",
-                description: "Get smart recipe suggestions based on your ingredients"
-            )
-            
-            PremiumFeatureCard(
-                icon: "square.stack.3d.up.fill",
-                iconColor: .orange,
-                title: "Unlimited Storage",
-                description: "Store unlimited items in your fridge with no restrictions"
-            )
-            
-            PremiumFeatureCard(
-                icon: "paintpalette.fill",
-                iconColor: .pink,
-                title: "Custom Fridge Themes",
-                description: "Personalize your fridge with beautiful themes and colors"
-            )
-            
-            PremiumFeatureCard(
-                icon: "icloud.fill",
-                iconColor: .cyan,
-                title: "Cloud Sync",
-                description: "Access your fridge from all your devices"
-            )
         }
     }
     
@@ -175,16 +147,6 @@ struct PremiumFeaturesSheet: View {
                     .foregroundColor(.white.opacity(0.7))
                     .padding(.top, 8)
             }
-            
-            Text("7-day free trial included")
-                .font(.system(size: 15, weight: .medium))
-                .foregroundColor(.green.opacity(0.9))
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .background(
-                    Capsule()
-                        .fill(Color.green.opacity(0.2))
-                )
         }
         .padding(.vertical, 8)
     }
@@ -196,7 +158,7 @@ struct PremiumFeaturesSheet: View {
                     ProgressView()
                         .tint(.white)
                 } else {
-                    Text("Start Free Trial")
+                    Text("Subscribe")
                         .font(.system(size: 20, weight: .bold))
                 }
             }
@@ -221,20 +183,20 @@ struct PremiumFeaturesSheet: View {
     
     private var termsSection: some View {
         VStack(spacing: 8) {
-            Text("After 7-day free trial: \(product.displayPrice) per \(product.formattedDuration)")
+            Text("\(product.displayPrice) per \(product.formattedDuration), charged to your Apple ID.")
                 .font(.system(size: 13))
                 .foregroundColor(.white.opacity(0.6))
-            
-            Text("Auto-renews until cancelled. Cancel anytime.")
+
+            Text("Auto-renews until cancelled. Cancel anytime in your Apple ID settings.")
                 .font(.system(size: 13))
                 .foregroundColor(.white.opacity(0.6))
-            
-            Button(action: { }) {
-                Text("Terms & Privacy Policy")
-                    .font(.system(size: 13))
-                    .foregroundColor(.white.opacity(0.8))
-                    .underline()
+
+            HStack(spacing: 16) {
+                Link("Terms of Use", destination: AppLinks.termsOfUse)
+                Link("Privacy Policy", destination: AppLinks.privacyPolicy)
             }
+            .font(.system(size: 13))
+            .foregroundColor(.white.opacity(0.8))
         }
         .multilineTextAlignment(.center)
     }
