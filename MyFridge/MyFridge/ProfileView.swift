@@ -209,7 +209,7 @@ struct ProfileView: View {
 
 // MARK: - Stat Card Component
 struct StatCard: View {
-    let title: String
+    let title: LocalizedStringKey
     let value: String
     let icon: String
     let color: Color
@@ -240,10 +240,10 @@ struct StatCard: View {
 
 // MARK: - Pricing Option Button Component
 struct PricingOptionButton: View {
-    let title: String
+    let title: LocalizedStringKey
     let price: String
-    let period: String
-    var badge: String? = nil
+    let period: LocalizedStringKey
+    var badge: LocalizedStringKey? = nil
     let action: () -> Void
     
     var body: some View {

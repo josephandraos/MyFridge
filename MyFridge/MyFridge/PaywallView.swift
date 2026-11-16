@@ -164,7 +164,7 @@ struct PaywallView: View {
 
 struct QuickFeatureRow: View {
     let icon: String
-    let title: String
+    let title: LocalizedStringKey
     
     var body: some View {
         HStack(spacing: 12) {
@@ -206,7 +206,7 @@ struct PricingCard: View {
         product.id.contains("yearly")
     }
     
-    private var savings: String? {
+    private var savings: LocalizedStringKey? {
         if isYearly {
             return "Save 16%"
         }
@@ -247,7 +247,7 @@ struct PricingCard: View {
         .buttonStyle(PlainButtonStyle())
     }
     
-    private func savingsBadge(_ text: String) -> some View {
+    private func savingsBadge(_ text: LocalizedStringKey) -> some View {
         Text(text)
             .font(.system(size: 12, weight: .bold))
             .foregroundColor(.white)

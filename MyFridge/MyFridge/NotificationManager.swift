@@ -185,11 +185,13 @@ class NotificationManager: ObservableObject {
         } else {
             // Schedule individual notification
             let lead = leadTimeDays ?? item.customLeadTimeDays ?? defaultLeadTimeDays
-            let daysText = lead == 1 ? "day" : "days"
+            // (singular/plural is handled by the localized string below)
             
             let content = UNMutableNotificationContent()
-            content.title = "🍽️ Item Expiring Soon"
-            content.body = "\(item.name) expires in \(lead) \(daysText)"
+            content.title = String(localized: "🍽️ Item Expiring Soon")
+            content.body = lead == 1
+                ? String(localized: "\(item.name) expires in 1 day")
+                : String(localized: "\(item.name) expires in \(lead) days")
             content.sound = .default
             // Removed: content.badge = NSNumber(value: 1)
             content.categoryIdentifier = "EXPIRY_REMINDER"
@@ -203,8 +205,8 @@ class NotificationManager: ObservableObject {
             content.threadIdentifier = "expiry-reminders"
             
             // Add subtitle with category if available
-            if let category = item.category {
-                content.subtitle = category
+            if item.category != nil {
+                content.subtitle = item.itemCategory.localizedName
             }
             
             let components = Calendar.current.dateComponents(
@@ -246,8 +248,8 @@ class NotificationManager: ObservableObject {
         center.removePendingNotificationRequests(withIdentifiers: [dailyDigestIdentifier])
         
         let content = UNMutableNotificationContent()
-        content.title = "🍽️ MyFridge Daily Digest"
-        content.body = "Check your fridge for items expiring soon"
+        content.title = String(localized: "🍽️ MyFridge Daily Digest")
+        content.body = String(localized: "Check your fridge for items expiring soon")
         content.sound = .default
         // Removed: content.badge = NSNumber(value: 1)
         content.categoryIdentifier = "DAILY_DIGEST"
@@ -288,13 +290,13 @@ class NotificationManager: ObservableObject {
     func setupNotificationCategories() {
         let snoozeAction = UNNotificationAction(
             identifier: "SNOOZE_ACTION",
-            title: "Snooze 1 Day",
+            title: String(localized: "Snooze 1 Day"),
             options: []
         )
         
         let markUsedAction = UNNotificationAction(
             identifier: "MARK_USED_ACTION",
-            title: "Mark as Used",
+            title: String(localized: "Mark as Used"),
             options: [.destructive, .authenticationRequired]
         )
         
@@ -460,8 +462,8 @@ extension NotificationManager {
     /// Test notification (for debugging)
     func sendTestNotification() async {
         let content = UNMutableNotificationContent()
-        content.title = "🧪 Test Notification"
-        content.body = "MyFridge notifications are working!"
+        content.title = String(localized: "🧪 Test Notification")
+        content.body = String(localized: "MyFridge notifications are working!")
         content.sound = .default
         
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)

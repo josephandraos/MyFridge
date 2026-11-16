@@ -453,14 +453,14 @@ struct CategoryHeaderView: View {
                 .font(.system(size: 28))
             
             // Category name
-            Text(category.rawValue)
+            Text(category.displayName)
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(.primary)
             
             Spacer()
             
             // Item count
-            Text("\(itemCount) \(itemCount == 1 ? "item" : "items")")
+            Text("\(itemCount) items")
                 .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 10)
@@ -671,7 +671,7 @@ struct AddItemView: View {
                     
                     Picker("Category", selection: $category) {
                         ForEach(ItemCategory.allCases, id: \.self) { cat in
-                            Text(cat.rawValue).tag(cat)
+                            Text(cat.displayName).tag(cat)
                         }
                     }
                 }
@@ -771,7 +771,7 @@ struct AddItemView: View {
 
 // MARK: - Quick Date Button Component
 struct QuickDateButton: View {
-    let title: String
+    let title: LocalizedStringKey
     let days: Int
     @Binding var selection: Date
     
@@ -790,215 +790,6 @@ struct QuickDateButton: View {
                 )
         }
         .buttonStyle(.plain)
-    }
-}
-
-// MARK: - Emoji Helper (Strict Whitelist - matches ReceiptParser)
-struct ItemEmojiHelper {
-    static func emoji(for itemName: String) -> String {
-        let lower = itemName.lowercased().trimmingCharacters(in: .whitespaces)
-        
-        guard !lower.isEmpty else { return "🍿" }
-        
-        // DAIRY & EGGS
-        if lower.contains("milk") { return "🥛" }
-        if lower.contains("butter") { return "🧈" }
-        if lower.contains("cheese") { return "🧀" }
-        if lower.contains("ice cream") { return "🍦" }
-        if lower.contains("egg") { return "🥚" }
-        if lower.contains("yogurt") || lower.contains("yoghurt") { return "🍶" }
-        if lower.contains("cream") { return "🥛" }
-        
-        // MEAT & FISH
-        if lower.contains("chicken") { return "🍗" }
-        if lower.contains("steak") || lower.contains("beef") { return "🥩" }
-        if lower.contains("bacon") { return "🥓" }
-        if lower.contains("rib") || lower.contains("pork") { return "🍖" }
-        if lower.contains("fish") { return "🐟" }
-        if lower.contains("salmon") { return "🐟" }
-        if lower.contains("tuna") { return "🐟" }
-        if lower.contains("shrimp") || lower.contains("prawn") { return "🦐" }
-        if lower.contains("turkey") { return "🍗" }
-        if lower.contains("ham") { return "🍖" }
-        if lower.contains("sausage") { return "🌭" }
-        
-        // FRUITS
-        if lower.contains("apple") { return "🍎" }
-        if lower.contains("banana") { return "🍌" }
-        if lower.contains("strawberr") { return "🍓" }
-        if lower.contains("grape") { return "🍇" }
-        if lower.contains("orange") { return "🍊" }
-        if lower.contains("watermelon") { return "🍉" }
-        if lower.contains("lemon") { return "🍋" }
-        if lower.contains("peach") { return "🍑" }
-        if lower.contains("cherry") || lower.contains("cherries") { return "🍒" }
-        if lower.contains("pear") { return "🍐" }
-        if lower.contains("pineapple") { return "🍍" }
-        if lower.contains("mango") { return "🥭" }
-        if lower.contains("kiwi") { return "🥝" }
-        if lower.contains("avocado") { return "🥑" }
-        if lower.contains("blueberr") { return "🫐" }
-        if lower.contains("raspberr") { return "🍓" }
-        
-        // VEGETABLES
-        if lower.contains("carrot") { return "🥕" }
-        if lower.contains("cucumber") { return "🥒" }
-        if lower.contains("tomato") { return "🍅" }
-        if lower.contains("lettuce") || lower.contains("salad") { return "🥬" }
-        if lower.contains("corn") { return "🌽" }
-        if lower.contains("broccoli") { return "🥦" }
-        if lower.contains("garlic") { return "🧄" }
-        if lower.contains("onion") { return "🧅" }
-        if lower.contains("potato") { return "🥔" }
-        if lower.contains("mushroom") { return "🍄" }
-        if lower.contains("pepper") || lower.contains("bell") { return "🫑" }
-        if lower.contains("eggplant") { return "🍆" }
-        if lower.contains("spinach") { return "🥬" }
-        if lower.contains("celery") { return "🥬" }
-        
-        // BREAD & BAKERY
-        if lower.contains("bread") { return "🍞" }
-        if lower.contains("croissant") { return "🥐" }
-        if lower.contains("baguette") { return "🥖" }
-        if lower.contains("cupcake") { return "🧁" }
-        if lower.contains("cake") { return "🍰" }
-        if lower.contains("bagel") { return "🥯" }
-        if lower.contains("donut") || lower.contains("doughnut") { return "🍩" }
-        if lower.contains("pretzel") { return "🥨" }
-        if lower.contains("muffin") { return "🧁" }
-        if lower.contains("cookie") { return "🍪" }
-        if lower.contains("roll") { return "🥖" }
-        
-        // PREPARED FOODS
-        if lower.contains("pizza") { return "🍕" }
-        if lower.contains("burger") { return "🍔" }
-        if lower.contains("sandwich") { return "🥪" }
-        if lower.contains("hot dog") || lower.contains("hotdog") { return "🌭" }
-        if lower.contains("taco") { return "🌮" }
-        if lower.contains("burrito") { return "🌯" }
-        if lower.contains("pasta") || lower.contains("spaghetti") { return "🍝" }
-        if lower.contains("curry") { return "🍛" }
-        if lower.contains("sushi") { return "🍣" }
-        if lower.contains("ramen") || lower.contains("noodle") { return "🍜" }
-        if lower.contains("rice") { return "🍚" }
-        if lower.contains("wrap") { return "🌯" }
-        if lower.contains("soup") { return "🍲" }
-        
-        // BEVERAGES
-        if lower.contains("coffee") { return "☕" }
-        if lower.contains("latte") { return "☕" }
-        if lower.contains("cappuccino") || lower.contains("cappu") { return "☕" }
-        if lower.contains("espresso") { return "☕" }
-        if lower.contains("americano") { return "☕" }
-        if lower.contains("mocha") { return "☕" }
-        if lower.contains("juice") { return "🧃" }
-        if lower.contains("soda") || lower.contains("pop") { return "🥤" }
-        if lower.contains("bubble tea") || lower.contains("boba") { return "🧋" }
-        if lower.contains("tea") && !lower.contains("bubble") { return "🍵" }
-        if lower.contains("wine") { return "🍷" }
-        if lower.contains("beer") { return "🍺" }
-        if lower.contains("water") { return "💧" }
-        if lower.contains("smoothie") { return "🥤" }
-        
-        // SNACKS & CONDIMENTS
-        if lower.contains("chocolate") { return "🍫" }
-        if lower.contains("cookie") { return "🍪" }
-        if lower.contains("popcorn") { return "🍿" }
-        if lower.contains("salt") { return "🧂" }
-        if lower.contains("ketchup") { return "🍅" }
-        if lower.contains("jar") || lower.contains("jam") || lower.contains("pickle") { return "🫙" }
-        if lower.contains("honey") { return "🍯" }
-        if lower.contains("peanut") || lower.contains("nut") { return "🥜" }
-        if lower.contains("candy") { return "🍬" }
-        if lower.contains("chips") { return "🍟" }
-        if lower.contains("crackers") { return "🍘" }
-        
-        // FROZEN
-        if lower.contains("ice") && !lower.contains("ice cream") { return "🧊" }
-        if lower.contains("dumpling") { return "🥟" }
-        if lower.contains("frozen") { return "🧊" }
-        
-        // Default fallback (popcorn = snacks category)
-        return "🍿"
-    }
-    
-    // Auto-detect category based on item name
-    static func detectCategory(for itemName: String) -> ItemCategory {
-        let lower = itemName.lowercased().trimmingCharacters(in: .whitespaces)
-        
-        guard !lower.isEmpty else { return .snacks }
-        
-        // DAIRY & EGGS
-        if lower.contains("milk") || lower.contains("butter") || lower.contains("cheese") ||
-           lower.contains("ice cream") || lower.contains("egg") || lower.contains("yogurt") ||
-           lower.contains("yoghurt") || lower.contains("cream") {
-            return .dairy
-        }
-        
-        // MEAT & FISH
-        if lower.contains("chicken") || lower.contains("steak") || lower.contains("beef") ||
-           lower.contains("bacon") || lower.contains("rib") || lower.contains("pork") ||
-           lower.contains("fish") || lower.contains("salmon") || lower.contains("tuna") ||
-           lower.contains("shrimp") || lower.contains("prawn") || lower.contains("turkey") ||
-           lower.contains("ham") || lower.contains("sausage") {
-            return .meat
-        }
-        
-        // FRUITS
-        if lower.contains("apple") || lower.contains("banana") || lower.contains("strawberr") ||
-           lower.contains("grape") || lower.contains("orange") || lower.contains("watermelon") ||
-           lower.contains("lemon") || lower.contains("peach") || lower.contains("cherry") ||
-           lower.contains("cherries") || lower.contains("pear") || lower.contains("pineapple") ||
-           lower.contains("mango") || lower.contains("kiwi") || lower.contains("avocado") ||
-           lower.contains("blueberr") || lower.contains("raspberr") {
-            return .fruits
-        }
-        
-        // VEGETABLES
-        if lower.contains("carrot") || lower.contains("cucumber") || lower.contains("tomato") ||
-           lower.contains("lettuce") || lower.contains("salad") || lower.contains("corn") ||
-           lower.contains("broccoli") || lower.contains("garlic") || lower.contains("onion") ||
-           lower.contains("potato") || lower.contains("mushroom") || lower.contains("pepper") ||
-           lower.contains("bell") || lower.contains("eggplant") || lower.contains("spinach") ||
-           lower.contains("celery") {
-            return .vegetables
-        }
-        
-        // BREAD & BAKERY
-        if lower.contains("bread") || lower.contains("croissant") || lower.contains("baguette") ||
-           lower.contains("cupcake") || lower.contains("cake") || lower.contains("bagel") ||
-           lower.contains("donut") || lower.contains("doughnut") || lower.contains("pretzel") ||
-           lower.contains("muffin") || lower.contains("cookie") || lower.contains("roll") {
-            return .bakery
-        }
-        
-        // PREPARED FOODS
-        if lower.contains("pizza") || lower.contains("burger") || lower.contains("sandwich") ||
-           lower.contains("hot dog") || lower.contains("hotdog") || lower.contains("taco") ||
-           lower.contains("burrito") || lower.contains("pasta") || lower.contains("spaghetti") ||
-           lower.contains("curry") || lower.contains("sushi") || lower.contains("ramen") ||
-           lower.contains("noodle") || lower.contains("rice") || lower.contains("wrap") ||
-           lower.contains("soup") {
-            return .prepared
-        }
-        
-        // BEVERAGES
-        if lower.contains("coffee") || lower.contains("latte") || lower.contains("cappuccino") ||
-           lower.contains("cappu") || lower.contains("espresso") || lower.contains("americano") ||
-           lower.contains("mocha") || lower.contains("juice") || lower.contains("soda") ||
-           lower.contains("pop") || lower.contains("bubble tea") || lower.contains("boba") ||
-           lower.contains("tea") || lower.contains("wine") || lower.contains("beer") ||
-           lower.contains("water") || lower.contains("smoothie") {
-            return .beverages
-        }
-        
-        // FROZEN
-        if lower.contains("ice") || lower.contains("dumpling") || lower.contains("frozen") {
-            return .frozen
-        }
-        
-        // SNACKS & CONDIMENTS (default)
-        return .snacks
     }
 }
 

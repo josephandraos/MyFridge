@@ -274,13 +274,13 @@ extension Product {
         
         switch unit {
         case .day:
-            return value == 1 ? "day" : "\(value) days"
+            return value == 1 ? String(localized: "day") : String(localized: "\(value) days")
         case .week:
-            return value == 1 ? "week" : "\(value) weeks"
+            return value == 1 ? String(localized: "week") : String(localized: "\(value) weeks")
         case .month:
-            return value == 1 ? "month" : "\(value) months"
+            return value == 1 ? String(localized: "month") : String(localized: "\(value) months")
         case .year:
-            return value == 1 ? "year" : "\(value) years"
+            return value == 1 ? String(localized: "year") : String(localized: "\(value) years")
         @unknown default:
             return ""
         }

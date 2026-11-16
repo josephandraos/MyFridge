@@ -1,0 +1,40 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "NSCameraUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MyFridge uses the camera to scan your grocery receipts and add items to your fridge."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MyFridge utilise l'appareil photo pour numériser vos reçus d'épicerie et ajouter les articles à votre frigo."
+          }
+        }
+      }
+    },
+    "NSPhotoLibraryAddUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MyFridge needs to save scanned receipts"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MyFridge doit enregistrer les reçus numérisés."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

@@ -144,7 +144,7 @@ struct SettingsView: View {
                 
                 Spacer()
                 
-                Text(notificationManager.notificationPermissionGranted ? "Enabled" : "Disabled")
+                Text(notificationManager.notificationPermissionGranted ? LocalizedStringKey("Enabled") : LocalizedStringKey("Disabled"))
                     .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(notificationManager.notificationPermissionGranted ? .green : .red)
             }
@@ -180,7 +180,7 @@ struct SettingsView: View {
                     
                     Spacer()
                     
-                    Text("\(notificationManager.defaultLeadTimeDays) day\(notificationManager.defaultLeadTimeDays == 1 ? "" : "s")")
+                    Text("\(notificationManager.defaultLeadTimeDays) days")
                         .font(.system(size: 17, weight: .semibold))
                         .foregroundStyle(.blue)
                 }
@@ -242,7 +242,7 @@ struct SettingsView: View {
                             .font(.system(size: 17, weight: .medium))
                         
                         Text(notificationManager.useDailyDigest ?
-                             "One summary per day" : "Individual notifications")
+                             LocalizedStringKey("One summary per day") : LocalizedStringKey("Individual notifications"))
                             .font(.system(size: 13))
                             .foregroundStyle(.secondary)
                     }
@@ -480,7 +480,7 @@ struct SettingsView: View {
     
     // MARK: - Helper Properties
     
-    private var notificationStatusText: String {
+    private var notificationStatusText: LocalizedStringKey {
         switch notificationManager.notificationStatus {
         case .authorized:
             return "Authorized"
@@ -523,7 +523,7 @@ struct SettingsView: View {
 // MARK: - Preset Button Component
 
 struct PresetButton: View {
-    let title: String
+    let title: LocalizedStringKey
     let value: Int
     @Binding var current: Int
     
@@ -546,7 +546,7 @@ struct PresetButton: View {
 // MARK: - Time Preset Button Component
 
 struct TimePresetButton: View {
-    let title: String
+    let title: LocalizedStringKey
     let hour: Int
     let minute: Int
     @Binding var selectedHour: Int

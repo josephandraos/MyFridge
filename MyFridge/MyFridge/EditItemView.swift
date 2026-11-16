@@ -129,7 +129,7 @@ struct EditItemView: View {
                     
                     Picker("Category", selection: $category) {
                         ForEach(ItemCategory.allCases, id: \.self) { cat in
-                            Text(cat.rawValue).tag(cat)
+                            Text(cat.displayName).tag(cat)
                         }
                     }
                 }

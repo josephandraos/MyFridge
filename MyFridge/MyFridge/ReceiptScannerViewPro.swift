@@ -352,7 +352,7 @@ struct ReceiptScannerViewPro: View {
             guard !extractedText.isEmpty else {
                 await MainActor.run {
                     isProcessing = false
-                    errorMessage = "Could not extract text from receipt. Please try again with better lighting."
+                    errorMessage = String(localized: "Could not extract text from receipt. Please try again with better lighting.")
                     showError = true
                 }
                 return
@@ -369,7 +369,7 @@ struct ReceiptScannerViewPro: View {
             if parsedItems.isEmpty {
                 await MainActor.run {
                     isProcessing = false
-                    errorMessage = "No grocery items found. Please ensure the receipt is clearly visible."
+                    errorMessage = String(localized: "No grocery items found. Please ensure the receipt is clearly visible.")
                     showError = true
                 }
             } else {
@@ -406,7 +406,7 @@ struct ReceiptScannerViewPro: View {
                 quantity: parsedItem.quantity,
                 expirationDate: expirationDate,
                 category: category.rawValue,
-                notes: "Added from receipt scan"
+                notes: String(localized: "Added from receipt scan")
             )
             
             modelContext.insert(newItem)

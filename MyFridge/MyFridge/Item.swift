@@ -87,26 +87,24 @@ final class Item {
         if isExpired {
             let daysExpired = abs(days)
             if daysExpired == 0 {
-                return "Expired today"
+                return String(localized: "Expired today")
             } else if daysExpired == 1 {
-                return "Expired yesterday"
+                return String(localized: "Expired yesterday")
             } else {
-                return "Expired \(daysExpired) days ago"
+                return String(localized: "Expired \(daysExpired) days ago")
             }
         } else if days == 0 {
-            return "Expires today"
+            return String(localized: "Expires today")
         } else if days == 1 {
-            return "Expires tomorrow"
-        } else if isExpiringSoon {
-            return "Expires in \(days) days"
+            return String(localized: "Expires tomorrow")
         } else if days <= 14 {
-            return "Expires in \(days) days"
+            return String(localized: "Expires in \(days) days")
         } else if days <= 30 {
             let weeks = days / 7
-            return "Expires in \(weeks) week\(weeks == 1 ? "" : "s")"
+            return String(localized: "Expires in \(weeks) weeks")
         } else {
             let months = days / 30
-            return "Expires in \(months) month\(months == 1 ? "" : "s")"
+            return String(localized: "Expires in \(months) months")
         }
     }
     
@@ -115,15 +113,15 @@ final class Item {
         let days = daysUntilExpiry
         
         if isExpired {
-            return "Expired"
+            return String(localized: "Expired")
         } else if days == 0 {
-            return "Today"
+            return String(localized: "Today")
         } else if days == 1 {
-            return "Tomorrow"
+            return String(localized: "Tomorrow")
         } else if days <= 7 {
-            return "\(days)d"
+            return String(localized: "\(days)d")
         } else {
-            return "Fresh"
+            return String(localized: "Fresh")
         }
     }
     
@@ -190,6 +188,27 @@ enum ItemCategory: String, CaseIterable, Codable {
     case snacks = "Snacks & Condiments"
     case frozen = "Frozen Foods"
     
+    /// Localized name shown in the UI. NOTE: `rawValue` is what's stored in the
+    /// database (English), so never display or compare `rawValue` in the UI.
+    var displayName: LocalizedStringResource {
+        switch self {
+        case .dairy: return "Dairy & Eggs"
+        case .vegetables: return "Vegetables"
+        case .fruits: return "Fruits"
+        case .meat: return "Meat & Fish"
+        case .bakery: return "Bread & Bakery"
+        case .prepared: return "Prepared Foods"
+        case .beverages: return "Drinks & Beverages"
+        case .snacks: return "Snacks & Condiments"
+        case .frozen: return "Frozen Foods"
+        }
+    }
+
+    /// Localized name as a plain String (for notifications, etc.)
+    var localizedName: String {
+        String(localized: displayName)
+    }
+
     /// Returns an emoji representation of the category
     var emoji: String {
         switch self {

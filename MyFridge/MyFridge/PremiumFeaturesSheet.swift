@@ -24,7 +24,7 @@ struct PremiumFeaturesSheet: View {
     
     private var savings: String {
         if isYearly {
-            return "Save 16% vs. monthly"
+            return String(localized: "Save 16% vs. monthly")
         }
         return ""
     }
@@ -242,8 +242,8 @@ struct PremiumFeaturesSheet: View {
 struct PremiumFeatureCard: View {
     let icon: String
     let iconColor: Color
-    let title: String
-    let description: String
+    let title: LocalizedStringKey
+    let description: LocalizedStringKey
     
     var body: some View {
         HStack(alignment: .top, spacing: 16) {

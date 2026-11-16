@@ -119,13 +119,13 @@ struct WidgetItem: Codable, Identifiable {
     var expirationText: String {
         if isExpired {
             let days = abs(daysUntilExpiration)
-            return "Expired \(days)d ago"
+            return String(localized: "Expired \(days)d ago")
         } else if daysUntilExpiration == 0 {
-            return "Expires today!"
+            return String(localized: "Expires today!")
         } else if daysUntilExpiration == 1 {
-            return "Expires tomorrow"
+            return String(localized: "Expires tomorrow")
         } else {
-            return "Expires in \(daysUntilExpiration)d"
+            return String(localized: "Expires in \(daysUntilExpiration)d")
         }
     }
     

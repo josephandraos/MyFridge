@@ -1,0 +1,193 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "%@ removed from your fridge": {
+      "extractionState": "manual",
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ retiré de votre frigo"
+          }
+        }
+      }
+    },
+    "+ %lld more items": {
+      "extractionState": "manual",
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+ %lld autres articles"
+          }
+        }
+      }
+    },
+    "+%lld more": {
+      "extractionState": "manual",
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld de plus"
+          }
+        }
+      }
+    },
+    "All good! 🎉": {
+      "extractionState": "manual",
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tout est beau! 🎉"
+          }
+        }
+      }
+    },
+    "Consume Item": {
+      "extractionState": "manual",
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consommer l'article"
+          }
+        }
+      }
+    },
+    "Expired %lldd ago": {
+      "extractionState": "manual",
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expiré il y a %lld j"
+          }
+        }
+      }
+    },
+    "Expires in %lldd": {
+      "extractionState": "manual",
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expire dans %lld j"
+          }
+        }
+      }
+    },
+    "Expires today!": {
+      "extractionState": "manual",
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expire aujourd'hui!"
+          }
+        }
+      }
+    },
+    "Expires tomorrow": {
+      "extractionState": "manual",
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expire demain"
+          }
+        }
+      }
+    },
+    "Expiring Soon": {
+      "extractionState": "manual",
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bientôt expirés"
+          }
+        }
+      }
+    },
+    "Item ID": {
+      "extractionState": "manual",
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ID de l'article"
+          }
+        }
+      }
+    },
+    "Item Name": {
+      "extractionState": "manual",
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nom de l'article"
+          }
+        }
+      }
+    },
+    "Mark an item as consumed and remove it from your fridge": {
+      "extractionState": "manual",
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marquer un article comme consommé et le retirer de votre frigo"
+          }
+        }
+      }
+    },
+    "Nothing expiring soon!": {
+      "extractionState": "manual",
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rien n'expire bientôt!"
+          }
+        }
+      }
+    },
+    "Quick view of items expiring soon": {
+      "extractionState": "manual",
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aperçu rapide des articles qui expirent bientôt"
+          }
+        }
+      }
+    },
+    "Your fridge is well stocked": {
+      "extractionState": "manual",
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre frigo est bien garni"
+          }
+        }
+      }
+    },
+    "• Qty: %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "• Qté : %lld"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
