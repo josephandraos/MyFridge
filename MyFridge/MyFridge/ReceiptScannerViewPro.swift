@@ -336,12 +336,16 @@ struct ReceiptScannerViewPro: View {
             await MainActor.run { scanProgress = 0.2 }
             
             // Step 1: Preprocess image (crop to rectangle, enhance, de-skew)
-            let processedImage = await ImagePreprocessor.preprocessReceipt(image, rectangle: detectedRectangle)
+            // Bake in the photo orientation, find the receipt on the captured still, crop + enhance ONCE
+            let upright = ImagePreprocessor.normalizedOrientation(image)
+            let stillRectangle = await ImagePreprocessor.detectReceiptRectangle(in: upright)
+            let processedImage = await ImagePreprocessor.preprocessReceipt(upright, rectangle: stillRectangle)
             
             await MainActor.run { scanProgress = 0.5 }
             
             // Step 2: Run enhanced OCR on processed image
-            let extractedText = await ReceiptOCREngine.extractText(from: processedImage, region: detectedRectangle)
+            // Already cropped above: do NOT pass a region here (that cropped a second time with the wrong coordinates)
+            let extractedText = await ReceiptOCREngine.extractText(from: processedImage)
             
             await MainActor.run {
                 scannedText = extractedText

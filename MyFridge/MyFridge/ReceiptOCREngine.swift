@@ -26,6 +26,12 @@ import Vision
  If you don't install ML Kit, the code will automatically fall back to Apple's Vision framework.
  */
 
+/// One piece of recognized text and where it sits on the page (normalized 0...1 coordinates)
+struct OCRFragment {
+    let text: String
+    let box: CGRect
+}
+
 struct ReceiptOCREngine {
     
     // MARK: - Main OCR Function
@@ -95,6 +101,40 @@ struct ReceiptOCREngine {
     
     END OF ML KIT CODE */
     
+    // MARK: - Row reconstruction
+
+    /// Minimum Vision confidence to keep a piece of text
+    static let minimumConfidence: Float = 0.5
+
+    /// Rebuilds receipt rows: groups text pieces that sit on the same horizontal line
+    /// (Vision coordinates: origin bottom-left, y grows upward), orders each row left to right,
+    /// and joins pieces with two spaces. Rows are returned top to bottom.
+    static func rowsText(from fragments: [OCRFragment]) -> String {
+        let sorted = fragments.sorted { $0.box.midY > $1.box.midY }
+
+        var rows: [[OCRFragment]] = []
+        var rowMidY: [CGFloat] = []
+        var rowHeight: [CGFloat] = []
+
+        for fragment in sorted {
+            if let last = rows.indices.last,
+               abs(fragment.box.midY - rowMidY[last]) <= max(fragment.box.height, rowHeight[last]) * 0.5 {
+                rows[last].append(fragment)
+                let n = CGFloat(rows[last].count)
+                rowMidY[last] = (rowMidY[last] * (n - 1) + fragment.box.midY) / n
+                rowHeight[last] = max(rowHeight[last], fragment.box.height)
+            } else {
+                rows.append([fragment])
+                rowMidY.append(fragment.box.midY)
+                rowHeight.append(fragment.box.height)
+            }
+        }
+
+        return rows
+            .map { row in row.sorted { $0.box.minX < $1.box.minX }.map { $0.text }.joined(separator: "  ") }
+            .joined(separator: "\n")
+    }
+
     // MARK: - Apple Vision OCR (Good Quality, Built-in)
     
     /// Extract text using Apple's Vision framework with optimal settings and optional region filtering
@@ -120,33 +160,36 @@ struct ReceiptOCREngine {
                     return
                 }
                 
-                var extractedText = ""
-                
+                // Collect every recognized line WITH its position, then rebuild the rows.
+                // Vision often returns an item name and its price as two separate pieces when
+                // there is a wide gap between the columns; rowsText glues them back together.
+                var fragments: [OCRFragment] = []
+
                 for observation in observations {
                     // Filter by region if provided (for non-cropped images)
-                    if let region = filterRegion {
-                        // Check if text is inside the receipt rectangle
-                        if !isTextInsideRectangle(observation.boundingBox, rectangle: region) {
-                            continue // Skip text outside receipt
-                        }
+                    if let region = filterRegion,
+                       !isTextInsideRectangle(observation.boundingBox, rectangle: region) {
+                        continue // Skip text outside receipt
                     }
-                    
+
                     guard let topCandidate = observation.topCandidates(1).first else { continue }
-                    
-                    // Only include text with good confidence (increased from 0.6 to 0.75)
-                    if topCandidate.confidence >= 0.75 {
-                        extractedText += topCandidate.string + "\n"
+
+                    // Keep anything reasonably readable. The parser filters junk, but it can't
+                    // recover a line that was thrown away here (0.75 dropped faded thermal-paper lines).
+                    if topCandidate.confidence >= minimumConfidence {
+                        fragments.append(OCRFragment(text: topCandidate.string, box: observation.boundingBox))
                     }
                 }
-                
-                continuation.resume(returning: extractedText)
+
+                continuation.resume(returning: rowsText(from: fragments))
             }
             
             // Configure for BEST accuracy
             request.recognitionLevel = .accurate // Slower but much better
-            request.usesLanguageCorrection = true
-            request.recognitionLanguages = ["en-US", "fr-CA"] // English + French
-            request.minimumTextHeight = 0.03 // Increased from 0.01 - ignore tiny text (likely noise)
+            request.usesLanguageCorrection = false // receipts are full of abbreviations/codes ("LAIT 2% 2L", "KS ORG EGGS"); autocorrect mangles them
+            request.recognitionLanguages = ["fr-FR", "en-US"] // French + English ("fr-CA" is not a Vision language; fr-FR reads Quebec French fine)
+            // NOTE: no minimumTextHeight. A tall receipt crop has 30-60 lines, so each line is only
+            // ~1.5-3% of the image height; a 0.03 minimum silently dropped most of the items.
             request.revision = VNRecognizeTextRequestRevision3 // Use latest revision
             
             // Perform request

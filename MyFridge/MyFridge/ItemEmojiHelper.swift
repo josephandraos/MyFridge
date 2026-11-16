@@ -29,6 +29,12 @@ struct ItemEmojiHelper {
         return rule(for: itemName)?.category ?? .snacks
     }
 
+    /// True when the name matches any known food word (English or French).
+    /// Used by the receipt parser to accept lines that have no price.
+    static func isKnownFood(_ itemName: String) -> Bool {
+        return rule(for: itemName) != nil
+    }
+
     // MARK: - Matching
 
     private static let defaultEmoji = "🍿"

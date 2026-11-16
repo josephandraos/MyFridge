@@ -219,7 +219,7 @@ class CameraViewControllerPro: UIViewController {
         
         textRecognitionRequest.recognitionLevel = .accurate
         textRecognitionRequest.usesLanguageCorrection = true
-        textRecognitionRequest.recognitionLanguages = ["en-US", "fr-CA"]
+        textRecognitionRequest.recognitionLanguages = ["fr-FR", "en-US"]
         textRecognitionRequest.minimumTextHeight = 0.03 // Increased to ignore small noise
     }
     

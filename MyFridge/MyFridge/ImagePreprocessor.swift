@@ -243,4 +243,51 @@ struct ImagePreprocessor {
         
         return nil
     }
+
+    // MARK: - Orientation & Rectangle Detection (on the captured still)
+
+    /// Camera photos carry an orientation FLAG (e.g. .right for a portrait shot) instead of rotated
+    /// pixels, and Vision ignores that flag when given a CGImage. Bake the rotation into the pixels first.
+    static func normalizedOrientation(_ image: UIImage) -> UIImage {
+        guard image.imageOrientation != .up else { return image }
+
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = image.scale
+        let renderer = UIGraphicsImageRenderer(size: image.size, format: format)
+        return renderer.image { _ in
+            image.draw(in: CGRect(origin: .zero, size: image.size))
+        }
+    }
+
+    /// Finds the receipt on the CAPTURED still image. We must not reuse the rectangle from the live
+    /// camera preview: that frame has a different orientation and size than the final photo, so its
+    /// coordinates crop the wrong area.
+    static func detectReceiptRectangle(in image: UIImage) async -> VNRectangleObservation? {
+        guard let cgImage = image.cgImage else { return nil }
+
+        return await Task.detached(priority: .userInitiated) { () -> VNRectangleObservation? in
+            let request = VNDetectRectanglesRequest()
+            request.minimumAspectRatio = 0.2
+            request.maximumAspectRatio = 1.0
+            request.minimumSize = 0.2
+            request.quadratureTolerance = 30
+            request.maximumObservations = 3
+
+            let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+            do {
+                try handler.perform([request])
+            } catch {
+                print("❌ Receipt rectangle detection failed: \(error)")
+                return nil
+            }
+
+            let candidates = request.results ?? []
+            // Largest rectangle wins; ignore tiny ones (a logo, a bar code)
+            let best = candidates.max { a, b in
+                a.boundingBox.width * a.boundingBox.height < b.boundingBox.width * b.boundingBox.height
+            }
+            guard let best = best, best.boundingBox.width * best.boundingBox.height >= 0.15 else { return nil }
+            return best
+        }.value
+    }
 }
