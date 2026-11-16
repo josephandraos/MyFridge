@@ -390,25 +390,6 @@ struct SettingsView: View {
     
     private var aboutSection: some View {
         Section {
-            Link(destination: AppLinks.privacyPolicy) {
-                HStack {
-                    Image(systemName: "hand.raised.fill")
-                        .font(.system(size: 20))
-                        .foregroundStyle(.blue)
-                        .frame(width: 28)
-                    
-                    Text("Privacy Policy")
-                        .font(.system(size: 17))
-                        .foregroundStyle(.primary)
-                    
-                    Spacer()
-                    
-                    Image(systemName: "arrow.up.right")
-                        .font(.system(size: 12))
-                        .foregroundStyle(.secondary)
-                }
-            }
-            
             Link(destination: AppLinks.termsOfUse) {
                 HStack {
                     Image(systemName: "doc.text.fill")

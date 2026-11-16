@@ -193,7 +193,6 @@ struct PremiumFeaturesSheet: View {
 
             HStack(spacing: 16) {
                 Link("Terms of Use", destination: AppLinks.termsOfUse)
-                Link("Privacy Policy", destination: AppLinks.privacyPolicy)
             }
             .font(.system(size: 13))
             .foregroundColor(.white.opacity(0.8))

@@ -17,23 +17,6 @@
           }
         }
       }
-    },
-    "NSPhotoLibraryAddUsageDescription": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "MyFridge needs to save scanned receipts"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "MyFridge doit enregistrer les reçus numérisés."
-          }
-        }
-      }
     }
   },
   "version": "1.0"

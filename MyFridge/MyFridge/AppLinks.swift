@@ -9,10 +9,6 @@ import Foundation
 
 enum AppLinks {
 
-    // TODO: Replace with your real privacy policy URL before submitting to the App Store.
-    // App Store Connect requires a working privacy policy link for apps with subscriptions.
-    static let privacyPolicy = URL(string: "https://example.com/myfridge/privacy")!
-
     /// Apple's standard EULA. Fine to use as-is; swap for a custom one if you write your own.
     static let termsOfUse = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
 

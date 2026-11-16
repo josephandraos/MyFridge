@@ -1643,17 +1643,6 @@
         }
       }
     },
-    "Privacy Policy": {
-      "extractionState": "manual",
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Politique de confidentialité"
-          }
-        }
-      }
-    },
     "Processing Receipt...": {
       "extractionState": "manual",
       "localizations": {
